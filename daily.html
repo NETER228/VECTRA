@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Question — Vectra</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+</head>
+<body class="gm">
+<div class="g-wrap">
+  <header class="g-top">
+    <a class="brand" href="index.html" aria-label="Vectra — home"><div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></svg></div><b>VECTRA</b></a>
+    <div class="g-title"><h1 id="title">Daily Question</h1></div>
+    <div class="g-right"><button class="icon-btn" data-menu-open><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><a class="icon-btn" href="index.html" aria-label="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg></a></div>
+  </header>
+
+  <section class="dq" id="dq">
+    <div class="dq-meta"><span id="dqDate"></span><span class="chip" id="dqTag"></span></div>
+    <h2 class="dq-q" id="dqQ"></h2>
+    <div id="play">
+      <div id="numin"></div>
+      <p class="dq-note" id="dqTip"></p>
+      <p class="dq-hint" id="hint" aria-live="polite"></p>
+      <button class="go" id="chk"></button>
+    </div>
+    <div class="dq-res off" id="res"></div>
+  </section>
+  <p class="fairnote" data-i18n="fair.short"></p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/qload.js"></script>
+<script src="js/numinput.js"></script>
+<script src="js/fairplay.js"></script>
+<script src="js/daily.js"></script>
+</body>
+</html>

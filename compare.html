@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compare’It — Vectra</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+</head>
+<body class="gm">
+<div class="g-wrap">
+  <header class="g-top">
+    <a class="brand" href="index.html" aria-label="Vectra — home"><div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></svg></div><b>VECTRA</b></a>
+    <div class="g-title">
+      <h1>Compare’It <button class="help" id="helpBtn" data-i18n-attr="aria-label:c.help" aria-expanded="false">?</button></h1>
+      <div><span class="pillbar"><span data-i18n="c.round">round</span> <b id="rd">1/5</b> <span><span data-i18n="c.score">score</span> : <b id="sc">0</b></span></span></div>
+    </div>
+    <div class="g-right"><button class="icon-btn" data-menu-open><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><a class="icon-btn" href="index.html" aria-label="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg></a></div>
+  </header>
+
+  <div class="how" id="how" hidden data-i18n-html="c.how"></div>
+
+  <section class="stage" id="stage" tabindex="0" aria-label="Comparison stage. Arrow keys resize the green object, plus and minus zoom.">
+    <p class="g-instr" data-i18n="c.instr">Compare the sizes of the objects.</p>
+    <button class="fitbtn" id="fit"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4"/></svg><span data-i18n="c.fit">Fit both</span></button>
+    <div class="zoom">
+      <button class="zbtn" id="zin" data-i18n-attr="aria-label:c.zin"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/></svg></button>
+      <button class="zbtn" id="zout" data-i18n-attr="aria-label:c.zout"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></button>
+    </div>
+    <span class="zlabel" id="zl"></span>
+    <canvas id="cv"></canvas>
+    <div class="rcard" id="rcard" aria-live="polite">
+      <div class="rscore"><b id="rS">0</b><span> / 100</span></div>
+      <div class="rl"><span data-i18n="c.answer">Your answer</span>: <b id="rA"></b></div>
+      <div class="rl"><span data-i18n="c.actual">Actual</span>: <b id="rT"></b></div>
+      <div class="rm" id="rO"></div><div class="rm" id="rR"></div>
+    </div>
+    <div class="end off" id="end" role="dialog" aria-labelledby="endT">
+      <div class="endcard">
+        <h2 id="endT" data-i18n="c.gameOver">Game over</h2>
+        <div class="endscore"><b id="endS">0</b><span> / 500</span></div>
+        <p id="endP"></p>
+        <p class="endsync" id="endSync"></p>
+        <div class="endbtns"><button class="go" id="again" data-i18n="c.again">Play again</button><a class="go alt" href="index.html" data-i18n="c.home">Home</a></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="g-foot">
+    <div class="descs" id="descs" aria-live="polite"></div>
+    <button class="go" id="go">compare</button>
+  </div>
+  <p class="fairnote" data-i18n="fair.short"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/fairplay.js"></script>
+<script src="js/qload.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/compare.js"></script>
+</body>
+</html>

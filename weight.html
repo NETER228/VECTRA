@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Specify the weight — Vectra</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+</head>
+<body class="gm">
+<div class="g-wrap">
+  <header class="g-top">
+    <a class="brand" href="index.html" aria-label="Vectra — home"><div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></svg></div><b>VECTRA</b></a>
+    <div class="g-title">
+      <h1><span data-i18n="mode.weight">Specify the weight</span> <button class="help" id="helpBtn" data-i18n-attr="aria-label:c.help" aria-expanded="false">?</button></h1>
+      <div><span class="pillbar"><span data-i18n="c.round">round</span> <b id="rd">1/5</b> <span><span data-i18n="c.score">score</span> : <b id="sc">0</b></span></span></div>
+    </div>
+    <div class="g-right"><button class="icon-btn" data-menu-open><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><a class="icon-btn" href="index.html" aria-label="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg></a></div>
+  </header>
+
+  <div class="how" id="how" hidden data-i18n-html="w.how"></div>
+
+  <div class="wlayout">
+    <section class="stage wstage" id="stage" aria-label="Scale">
+      <p class="g-instr" data-i18n="w.instr">Specify the weight of the object.</p>
+      <p class="w-top" id="wTop"></p>
+      <canvas id="cv"></canvas>
+      <div class="wslider"><span id="wMin">1 kg</span><input type="range" id="wSl" min="0" max="42" step="0.01" data-i18n-attr="aria-label:w.label"><span id="wMax"></span></div>
+      <div class="end off" id="end" role="dialog" aria-labelledby="endT">
+        <div class="endcard">
+          <h2 id="endT" data-i18n="c.gameOver">Game over</h2>
+          <div class="endscore"><b id="endS">0</b><span> / 500</span></div>
+          <p id="endP"></p>
+          <p class="endsync" id="endSync"></p>
+          <div class="endbtns"><button class="go" id="again" data-i18n="c.again">Play again</button><a class="go alt" href="index.html" data-i18n="c.home">Home</a></div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="wpanel" id="wpanel" aria-label="Answer">
+      <div id="wGuess">
+        <div class="wbig"><b id="wBigV">—</b><span id="wBigU">kg</span></div>
+        <div class="wfull" id="wFull" aria-live="polite"></div>
+        <div id="numin"></div>
+        <p class="dq-note" id="wTip"></p>
+      </div>
+      <div class="rcard inline" id="rcard" aria-live="polite">
+        <div class="rscore"><b id="rS">0</b><span> / 100</span></div>
+        <div class="rl"><span data-i18n="c.answer">Your answer</span>: <b id="rA"></b></div>
+        <div class="rl"><span data-i18n="c.actual">Actual</span>: <b id="rT"></b></div>
+        <div class="rm" id="rO"></div><div class="rm" id="rR"></div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="g-foot">
+    <div class="descs" id="descs" aria-live="polite"></div>
+    <button class="go" id="go"></button>
+  </div>
+  <p class="fairnote" data-i18n="fair.short"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/numinput.js"></script>
+<script src="js/fairplay.js"></script>
+<script src="js/qload.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/weight.js"></script>
+</body>
+</html>

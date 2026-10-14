@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Archive — Vectra</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+</head>
+<body class="gm">
+<div class="g-wrap">
+  <header class="g-top">
+    <a class="brand" href="index.html" aria-label="Vectra — home"><div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></svg></div><b>VECTRA</b></a>
+    <div class="g-title"><h1 id="title">Archive</h1><div><span class="pillbar" id="prog"></span></div></div>
+    <div class="g-right"><button class="icon-btn" data-menu-open><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><a class="icon-btn" href="index.html" aria-label="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg></a></div>
+  </header>
+  <div class="ar-bar"><label class="ar-filter"><input type="checkbox" id="only"> <span id="onlyT"></span></label><a class="again" id="todayLink" href="daily.html"></a></div>
+  <ul class="ar-list" id="list"></ul>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/qload.js"></script>
+<script src="js/archive.js"></script>
+</body>
+</html>

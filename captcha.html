@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vectra — проверка</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+<script src="js/core.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+</head>
+<body class="cap">
+<canvas id="c" aria-hidden="true"></canvas>
+
+<main class="win" id="win" aria-labelledby="t">
+  <div class="brand">
+    <div class="logo"><svg class="i" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></svg></div>
+    <b>VECTRA</b>
+  </div>
+  <div class="row">
+    <button class="box" id="box" aria-label="Я не робот"><svg viewBox="0 0 24 24" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+    <span id="t">Я не робот</span>
+  </div>
+  <p id="msg" role="status" aria-live="polite">Поставь галочку в квадрате, затем проведи мышью по подсвеченной линии.</p>
+</main>
+
+<section class="win okc off" id="ok" aria-live="polite">
+  <div class="big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#06140d" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+  <h2>Капча успешно пройдена</h2>
+  <p id="okTxt"></p>
+</section>
+
+<div class="hint off" id="hint"><span id="hintTxt"></span><div class="bar"><i id="bar"></i></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/terms.js"></script>
+<script src="js/nick.js"></script>
+<script src="js/captcha.js"></script>
+</body>
+</html>
