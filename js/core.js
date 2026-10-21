@@ -1,39 +1,40 @@
-/* core.js — общие утилиты: хранилище, тема, язык, статус проверки, стрик. Подключается в <head> страниц. */
+/* core.js — общие утилиты. ВАЖНО: Vectra.store живёт только в памяти страницы и ничего не пишет в браузер.
+   Всё состояние игрока (ник, соглашение, капча, тема/язык, стрик, рекорд, ответы на вопрос дня) хранится в Supabase и подтягивается
+   при каждой загрузке страницы (см. boot.js → get_me). В браузере остаётся только токен анонимной сессии supabase-js. */
 (function () {
-  const P = 'vectra_';
-  const store = {
-    get(k, d) { try { const v = localStorage.getItem(P + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
-    set(k, v) { try { localStorage.setItem(P + k, JSON.stringify(v)); } catch {} },
-    del(k) { try { localStorage.removeItem(P + k); } catch {} }
-  };
-  const root = document.documentElement;
-  let theme = store.get('theme', null) || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  root.dataset.theme = theme;
+  const root = document.documentElement, mem = { gameActive: false };
+  const store = { get: (k, d) => (k in mem ? mem[k] : d), set(k, v) { mem[k] = v }, del(k) { delete mem[k] } };
+  root.dataset.theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';      // до загрузки профиля — системная тема
+  const fade = () => { root.classList.add('theme-crossfade'); clearTimeout(fade.t); fade.t = setTimeout(() => root.classList.remove('theme-crossfade'), 700) };      // плавная смена темы только на время смены, иначе !important ломает остальные анимации
+  fade();
   const dayNum = d => Math.floor(Date.parse(d + 'T00:00:00Z') / 864e5);
   window.Vectra = {
     store,
-    START: '2026-08-15',                         // день, с которого идёт нумерация Daily Question
+    START: '2026-08-15',                         // день, с которого идёт нумерация Daily Question (перекрывается значением из data/questions.json)
     theme: () => root.dataset.theme,
     toggleTheme() {
-      theme = theme === 'dark' ? 'light' : 'dark';
-      root.dataset.theme = theme; store.set('theme', theme);
-      dispatchEvent(new Event('vectra:theme'));
+      const t = root.dataset.theme === 'dark' ? 'light' : 'dark'; fade(); root.dataset.theme = t; mem.theme = t; dispatchEvent(new Event('vectra:theme'));
+      if (this.db) this.db.setPrefs({ theme: t }).catch(() => {});
     },
-    lang: () => store.get('lang', (navigator.language || 'en').toLowerCase().startsWith('ru') ? 'ru' : 'en'),
-    setLang: l => store.set('lang', l),
+    setGameActive(v) { mem.gameActive = !!v; },
+    isGameActive() { return !!mem.gameActive; },
+    lang: () => mem.lang || ((navigator.language || 'en').toLowerCase().startsWith('ru') ? 'ru' : 'en'),
+    setLang(l) { mem.lang = l; return this.db ? this.db.setPrefs({ lang: l }) : Promise.resolve() },
+    // данные профиля с сервера → память страницы
+    hydrate(me) {
+      const m = me || {}, st = m.streak || {}, pr = m.prefs || {};
+      Object.assign(mem, { nick: m.nickname || '', nickChosen: !!m.nickname_set, nickChangedAt: m.changed_at || '', terms: { v: m.terms || 0 }, verified: m.verified_until || 0,
+        best: m.best || 0, streak: st.current || 0, streakBest: st.best || 0, daily: m.daily || {}, theme: pr.theme, lang: pr.lang });
+      if (pr.theme && pr.theme !== root.dataset.theme) { fade(); root.dataset.theme = pr.theme; dispatchEvent(new Event('vectra:theme')) }
+    },
+    isVerified: () => (mem.verified || 0) > Date.now(),
+    setVerified() { mem.verified = Date.now() + 12 * 3600e3; return this.db.setVerified(true) },
+    clearVerified() { mem.verified = 0; return this.db.setVerified(false) },
+    markPlayed() {}, addRun() {},               // стрик и история считаются на сервере (submit_run / submit_daily)
     utcToday: () => new Date().toISOString().slice(0, 10),
     dayNum,
-    dayIndex(d) { return dayNum(d) - dayNum(this.START) },
-    // Прототип: флаг «проверка пройдена» живёт 12 часов. В проде его заменит анонимная сессия Supabase.
-    isVerified: () => store.get('verified', 0) > Date.now(),
-    setVerified() { store.set('verified', Date.now() + 12 * 3600e3); },
-    clearVerified() { store.del('verified'); },
-    // локальная история забегов (для статистики без интернета)
-    addRun(mode, score) { const r = store.get('runs', []); r.push({ mode, score, t: new Date().toISOString() }); store.set('runs', r.slice(-200)) },
-    // вызывается, когда игрок завершил игру / ответил на сегодняшний вопрос
-    markPlayed() {
-      const d = n => { const t = new Date(); t.setDate(t.getDate() - n); return t.toLocaleDateString('sv') }, last = store.get('lastPlay', '');
-      if (last !== d(0)) { const n = last === d(1) ? store.get('streak', 0) + 1 : 1; store.set('streak', n); store.set('streakBest', Math.max(n, store.get('streakBest', 0))); store.set('lastPlay', d(0)) }
-    }
+    dayIndex(d) { return dayNum(d) - dayNum(this.START) }
   };
+  addEventListener('pagehide', () => Vectra.setGameActive(false));
+  addEventListener('visibilitychange', () => { if (document.hidden) Vectra.setGameActive(false) });
 })();

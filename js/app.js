@@ -18,15 +18,9 @@
   r.oninput = upd; upd();
 
   // первый вход без выбранного ника — спрашиваем (капчу пользователь уже прошёл); ник, сохранённый без связи, досылаем в базу
-  if (Vectra.needsTerms() || Vectra.needsNick()) Vectra.onboard(); else Vectra.syncNick();
+  if (Vectra.needsTerms() || Vectra.needsNick()) Vectra.onboard();
 
   // соглашение можно перечитать в любой момент (кнопка «Принять» уже не нужна — повторно только показываем)
   $('#termsLink').onclick = e => { e.preventDefault(); Vectra.askTerms(() => {}, true) };
 
-  /* ---------- подтягиваем профиль и рекорды из Supabase (если доступен) ---------- */
-  if (Vectra.db && Vectra.db.enabled()) Vectra.db.stats().then(s => {
-    if (!s) return;
-    const best = Math.max(S.get('best', 0), s.compare.best, s.weight ? s.weight.best : 0), streak = s.streak ? s.streak.current : S.get('streak', 0);
-    S.set('best', best); if (s.profile) { S.set('nick', s.profile.nickname); dispatchEvent(new Event('vectra:profile')) } tiles(best, streak);
-  }).catch(() => {});
 })();

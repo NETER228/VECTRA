@@ -27,7 +27,8 @@
     for (const [lo, hi] of tiers) {
       let c = [];
       const astro = o => ['star', 'planet', 'exo', 'bh'].includes(o.cat);
-      for (const a of OBJ) for (const b of OBJ) { if (a === b || (a.cat === 'animal' && astro(b)) || (b.cat === 'animal' && astro(a))) continue; const lr = Math.abs(Math.log10(b.len / a.len)); if (lr >= lo && lr <= hi) c.push([a, b, (used.get(a) || 0) + (used.get(b) || 0)]) }
+      const tiny = o => o.cat === 'animal' || o.cat === 'item';
+      for (const a of OBJ) for (const b of OBJ) { if (a === b || (tiny(a) && astro(b)) || (tiny(b) && astro(a))) continue; const lr = Math.abs(Math.log10(b.len / a.len)); if (lr >= lo && lr <= hi) c.push([a, b, (used.get(a) || 0) + (used.get(b) || 0)]) }
       const m = Math.min(...c.map(x => x[2])); c = c.filter(x => x[2] === m);
       const [a, b] = c[Math.random() * c.length | 0];
       used.set(a, (used.get(a) || 0) + 1); used.set(b, (used.get(b) || 0) + 1); res.push({ A: a, B: b });
@@ -43,7 +44,7 @@
   let G = { round: 0, score: 0, pairs: [] }, cur = null, lastZl = '', resT = 0, pts = 0, shown = -1;
 
   function readCols() { const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim(); col = { bg: g('--bg'), card: g('--card'), pink: g('--pink'), green: g('--green'), tx: g('--tx'), mut: g('--mut'), ind: g('--ind2'), line: g('--line') } }
-  function resize() { const r = Math.min(devicePixelRatio || 1, 2), b = stage.getBoundingClientRect(); W = b.width; H = b.height; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); x0 = Math.round(W * (W < 560 ? .36 : .34)); ground = H - 72 }
+  function resize() { const r = Math.min(devicePixelRatio || 1, 2), b = stage.getBoundingClientRect(); W = b.width; H = b.height; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); x0 = Math.round(W * (W < 560 ? .36 : .34)); ground = H - 72; if (cur) { limits(); tlz = clampZ(tlz) } }
 
   /* ---------- рисование ---------- */
   function put(sh, left, base, bodyPx, o) {   // тело объекта (а не весь SVG) имеет ширину bodyPx и стоит на высоте base
@@ -113,6 +114,9 @@
   }
 
   /* ---------- камера ---------- */
+  // пределы зума: отдалять можно, пока самый большой объект каталога не уместится на экране; приближать — пока клетка сетки не станет 1 см
+  const MAXLEN = Math.max(...OBJ.map(o => o.len * ww(o)));
+  function limits() { lzMax = Math.log(7000); lzMin = Math.log(.92 * (W - 90) / MAXLEN) }      // 7000 px/м → шаг сетки 1 см (≈70 px)
   const clampZ = v => Math.max(lzMin, Math.min(lzMax, v));
   function zoomAt(f, px) { ax = px; fit = false; tlz = clampZ(tlz + Math.log(f)) }
   function fitBoth() {
@@ -132,29 +136,29 @@
   function setPill() { $('#rd').textContent = Math.min(G.round + 1, ROUNDS) + '/' + ROUNDS; $('#sc').textContent = G.score }
   function startRound() {
     cur = G.pairs[G.round]; const A = cur.A, B = cur.B;
-    lzMin = Math.log(1e-12 / A.len); lzMax = Math.log(4e5 / A.len); z0 = .2 * W / A.len; lz = tlz = Math.log(z0); z = z0; fit = false;
+    limits(); lz = tlz = clampZ(Math.log(.2 * W / A.len)); z = z0 = Math.exp(lz); fit = false;
     const wA = A.len * ww(A); ox = x0 - GAP - wA * z0; ax = x0; bx = wA + GAP / z0; by = 0; Bg = A.len; phase = 'guess'; lastZl = ''; shown = -1;
     stage.classList.remove('res'); rc.classList.remove('on');
     descs.innerHTML = `<div><span class="pk">${A.name}</span> — ${A.noun}: <b>${fmtLen(A.len)}</b> <em class="pk">${tr('c.toScale')}</em></div><div><span class="gr">${B.name}</span> — ${B.noun} <em class="gr">${tr('c.adjust')}</em></div>`;
     go.textContent = tr('c.compareBtn'); setPill(); G.log = G.log || []; Vectra.fairplay && Vectra.fairplay.on()
   }
-  function newGame() { G = { round: 0, score: 0, pairs: pickPairs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
+  function newGame() { Vectra.setGameActive(true); G = { round: 0, score: 0, pairs: pickPairs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
   function compare() {
     const A = cur.A, B = cur.B, g = Bg / A.len, t = B.len / A.len, err = Math.abs(Math.log10(g / t)), pct = Math.abs(Bg - B.len) / B.len * 100;
-    pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: A.id + '>' + B.id, g: g, t: t }); phase = 'result'; mode = null; Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
+    pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: A.id + '>' + B.id, g: g, t: t, pts }); phase = 'result'; mode = null; Vectra.sfx.play('reveal', pts / 100); Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
     $('#rS').textContent = 0; rc.className = 'rcard ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
     $('#rA').textContent = fmtLen(Bg); $('#rT').textContent = fmtLen(B.len) + ' (' + B.noun.replace(/ \(.*/, '') + ')';
     $('#rO').textContent = tr('c.off', { x: pct < 1000 ? Math.round(pct) + '%' : '×' + fmtX(Math.pow(10, err)) });
     $('#rR').textContent = lang === 'ru' ? tr('c.rel', { b: B.name, a: A.name, r: fmtX(t) }) : tr('c.rel', { b: B.name, a: A.name, r: rel(t) });
     requestAnimationFrame(() => rc.classList.add('on')); stage.classList.add('res'); go.textContent = tr(G.round + 1 < ROUNDS ? 'c.next' : 'c.finish'); fitTruth();
   }
-  function next() { if (G.round + 1 < ROUNDS) { G.round++; startRound() } else finish() }
+  function next() { if (G.round + 1 < ROUNDS) { Vectra.sfx.play('next'); G.round++; startRound() } else finish() }
   function finish() {
-    const S = Vectra.store, best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score); Vectra.markPlayed();
-    $('#endS').textContent = G.score; $('#endP').textContent = isBest ? tr('c.newBest') : tr('c.best', { n: best }); $('#endSync').textContent = tr('c.local');
-    Vectra.addRun('compare', G.score);
-    if (Vectra.db && Vectra.db.enabled()) Vectra.db.submitRun('compare', G.log).then(r => { if (r) $('#endSync').textContent = tr('c.synced') }).catch(e => console.info('[vectra] run not synced:', e.message || e));
-    go.disabled = true; $('#end').classList.remove('off'); $('#again').focus();
+    Vectra.setGameActive(false);
+    const S = Vectra.store, best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score);
+    $('#end').classList.add('off');
+    Vectra.showResult({ title: tr('mode.compare'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => (l && l.pts != null) ? l.pts : 0), best, isBest, onAgain: newGame });
+    Vectra.db.submitRun('compare', G.log).then(() => {}).catch(e => { console.warn('[vectra] run not saved:', e.message || e) });
   }
   go.onclick = () => phase === 'guess' ? compare() : next();
   $('#again').onclick = newGame;
@@ -166,8 +170,8 @@
   const pos = e => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top] };
   cv.addEventListener('pointerdown', e => {
     const [x, y] = pos(e); cv.setPointerCapture(e.pointerId); fit = false; ax = x;
-    if (phase === 'guess' && Math.hypot(x - geo.hand.x, y - geo.hand.y) < 26) { mode = 'size'; grab.dx = geo.hand.x - x; grab.dy = geo.hand.y - y }
-    else if (phase === 'guess' && inB(x, y)) { mode = 'move'; grab.x = x; grab.y = y }
+    if (phase === 'guess' && Math.hypot(x - geo.hand.x, y - geo.hand.y) < 26) { mode = 'size'; Vectra.sfx.play('pick'); grab.dx = geo.hand.x - x; grab.dy = geo.hand.y - y }
+    else if (phase === 'guess' && inB(x, y)) { mode = 'move'; Vectra.sfx.play('pick'); grab.x = x; grab.y = y }
     else { mode = 'pan'; grab.x = x }
     cv.style.cursor = mode === 'size' ? (geo.vert ? 'ns-resize' : 'nesw-resize') : 'grabbing';
   });
@@ -181,7 +185,7 @@
     else if (mode === 'move') { bx += (x - grab.x) / z; by = Math.max(0, by - (y - grab.y) / z); grab.x = x; grab.y = y }
     else { ox += x - grab.x; grab.x = x }
   });
-  const up = () => { mode = null; cv.style.cursor = 'default' }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  const up = () => { if (mode === 'size' || mode === 'move') Vectra.sfx.play('drop'); mode = null; cv.style.cursor = 'default' }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   stage.addEventListener('keydown', e => {
     const f = e.shiftKey ? 1.2 : 1.03;
     if (e.key === 'ArrowRight' && phase === 'guess') Bg *= f; else if (e.key === 'ArrowLeft' && phase === 'guess') Bg /= f;

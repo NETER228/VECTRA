@@ -157,8 +157,6 @@ function frame(now) {
 }
 
 /* ---------- сценарий ---------- */
-// после успешной капчи открываем анонимную сессию Supabase и создаём профиль (в проде этот шаг делает Edge Function после серверной проверки траектории)
-function startSession() { if (Vectra.db && Vectra.db.enabled()) Vectra.db.profile().then(p => { Vectra.store.set('nick', p.nickname) }).catch(e => console.info('[vectra] offline mode:', e.message || e)) }
 function say(t, c) { msg.textContent = t; msg.className = c || '' }
 function begin() {
   if (st !== 'idle' || Date.now() < lockUntil) return;
@@ -170,15 +168,20 @@ function reset(text, penalty) {
   if (penalty) { fails++; lockUntil = Date.now() + Math.min(16, 2 ** (fails - 1)) * 1000 }
   say(text, 'err');
 }
+let vp = Promise.resolve(), verr = null;      // отметка «капча пройдена» сохраняется на сервере
 function finish() {
   const err = verify(user, ch.ref, tol, D);
   if (err) { ghost = performance.now(); return reset(err, true) }
   st = 'done'; fails = 0; mice.forEach(m => m.wp = null); win.classList.remove('off'); hint.classList.add('off'); box.className = 'box spin'; say('Проверяем…');
   const t0 = user[0][2], payload = { id: ch.id, pts: user.map(p => [Math.round(p[0]), Math.round(p[1]), Math.round(p[2] - t0)]) };
   console.log('captcha payload →', payload);
-  setTimeout(() => { box.className = 'box ok'; say('Галочка поставлена', 'good'); Vectra.setVerified(); startSession() }, 700);
+  setTimeout(() => { box.className = 'box ok'; say('Галочка поставлена', 'good'); vp = Vectra.setVerified().catch(e => { verr = e; console.warn('[vectra] set_verified failed:', e.message || e) }) }, 700);
   setTimeout(() => { win.classList.add('off'); okTxt.textContent = 'Переходим на главную…'; okc.classList.remove('off'); dispatchEvent(new CustomEvent('vectra:captcha-pass', { detail: payload })) }, 1500);
-  setTimeout(() => { const go = () => { location.href = 'index.html' }; if (Vectra.needsTerms() || Vectra.needsNick()) { okc.classList.add('off'); Vectra.onboard(go) } else go() }, 2600);
+  setTimeout(async () => {
+    await vp; if (verr) { okc.classList.add('off'); win.classList.remove('off'); box.className = 'box'; st = 'idle'; say('Не удалось сохранить результат проверки на сервере. Проверьте соединение и попробуйте ещё раз.', 'err'); return }
+    const go = () => { location.href = 'index.html' };
+    if (Vectra.needsTerms() || Vectra.needsNick()) { okc.classList.add('off'); Vectra.onboard(go) } else go();
+  }, 2600);
 }
 box.onclick = begin;
 

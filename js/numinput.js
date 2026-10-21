@@ -65,7 +65,8 @@
     inp.addEventListener('beforeinput', e => {
       if (e.inputType !== 'insertText' && e.inputType !== 'insertCompositionText') return;     // удаление и прочее — пропускаем
       const d = e.data || ''; if (d.length === 1 && isDig(d)) return;
-      e.preventDefault(); if (d === '.' || d === ',') insert(DEC); else if (d.length > 1) insert(normalizePaste(d));    // всё остальное (буквы, e, минус, пробел) — запрещено
+      e.preventDefault(); if (d === '.' || d === ',' || d === 'б' || d === 'Б' || d === 'ю' || d === 'Ю') insert(DEC);       // б/ю — клавиши запятой и точки при русской раскладке
+      else if (d.length > 1) insert(normalizePaste(d));    // всё остальное (буквы, e, минус, пробел) — запрещено
     });
     inp.addEventListener('paste', e => { e.preventDefault(); insert(normalizePaste((e.clipboardData || window.clipboardData).getData('text'))) });
     inp.addEventListener('input', apply);
@@ -81,6 +82,7 @@
       },
       onChange(f) { subs.push(f) }, focus() { inp.focus() },
       setDisabled(b) { inp.disabled = b; btns.forEach(x => x.disabled = b) },
+      limit(cs) { btns.forEach((b, k) => { b.hidden = !!cs && defs[k].c !== undefined && !cs.includes(defs[k].c) }) },      // оставить только кнопки-множители с этими классами (null — все)
       reset() { inp.value = ''; pick(-1) }
     };
     return api;

@@ -6,7 +6,7 @@
       'menu.play': 'Play', 'menu.explore': 'Explore', 'menu.compareSub': 'Line up two sizes to scale', 'menu.weightSub': 'Read the scales', 'menu.dailySub': 'Today’s estimation challenge',
       'menu.archive': 'Archive', 'menu.archiveSub': 'Replay past questions', 'menu.stats': 'Statistics', 'menu.statsSub': 'Your scores, streaks and nickname',
       'menu.lb': 'Leaderboards', 'menu.lbSub': 'See how you rank', 'menu.recheck': 'Re-run human check', 'menu.guest': 'Guest', 'menu.soon': '{name} — coming soon',
-      'menu.themeToLight': 'Switch to light theme', 'menu.themeToDark': 'Switch to dark theme',
+      'menu.themeToLight': 'Switch to light theme', 'menu.themeToDark': 'Switch to dark theme', 'menu.langBusy': 'Finish the current round before changing language', 'stats.chartDaily': 'Daily Question', 'stats.chartOthers': 'Compare’It · Weight',
       'mode.compare': 'Compare’It', 'mode.weight': 'Specify the weight', 'mode.daily': 'Daily Question',
       'home.tagline': 'Trust your eye. Size up the world.', 'home.best': 'Personal best', 'home.score': 'Score : {n}', 'home.streak': 'STREAK', 'home.days': '{n} days', 'home.langs': 'Languages : {l}',
       'home.play': 'Play', 'home.rounds': '5 ROUNDS', 'home.compareDesc': 'Line up two sizes to scale.', 'home.compareBtn': 'compare', 'home.weightDesc': 'Read the scales.', 'home.weightBtn': 'To weigh',
@@ -25,6 +25,9 @@
       'c.gameOver': 'Game over', 'c.newBest': 'New personal best!', 'c.best': 'Personal best: {n}', 'c.again': 'Play again', 'c.home': 'Home', 'c.compareBtn': 'compare', 'c.next': 'Next round →', 'c.finish': 'Finish',
       'c.toScale': '(length to scale)', 'c.adjust': '(drag to move, use the handle to resize)', 'c.guess': 'Your guess', 'c.actualL': 'Actual', 'c.zoom': 'zoom', 'c.grid': 'grid', 'c.zoomOut': 'zoom out',
       'c.synced': 'Saved to your profile', 'c.local': 'Saved on this device only',
+      'share.result': 'Share result', 'share.copied': 'Copied to clipboard', 'share.title': 'My Vectra result', 'share.text': 'I scored {score} / 500 in Compare’It on Vectra. Can you beat it?',
+      'share.line': 'I scored {score} / {max} in {mode} on Vectra. Can you beat it?', 'share.lbl': 'Send your result to a friend', 'share.native': 'Share…', 'share.copyText': 'Copy text', 'share.save': 'Save image', 'share.imgCopied': 'Image copied — paste it into the chat (Ctrl+V)', 'share.copyFail': 'Could not copy — save the image instead', 'share.beat': 'Can you beat it?',
+      'menu.sound': 'Sound', 'menu.soundOff': 'Turn sound off', 'menu.soundOn': 'Turn sound on', 'w.fact': 'Fun fact', 'w.cat.tech': 'machine', 'w.cat.item': 'everyday object', 'n.wingspan': 'wingspan', 'n.hShoulder': 'shoulder height', 'n.width': 'width',
       'nick.title': 'Choose your nickname', 'nick.text': 'It will appear in your statistics and, later, on the leaderboards. No sign-up needed.', 'nick.ph': 'Your nickname', 'nick.ok': 'Continue', 'nick.anon': 'Stay anonymous',
       'nick.rules': '3–20 characters: letters, digits, _ . -', 'nick.taken': 'This nickname is already taken', 'nick.saving': 'Saving…', 'nick.later': 'You can change it any time in Statistics.', 'menu.nickChange': 'Change nickname',
       'w.instr': 'Specify the weight of the object.', 'w.toWeigh': 'To weigh', 'w.hint': '(drag the needle, move the slider or type a number)',
@@ -38,12 +41,12 @@
       'terms.decline': 'If you do not agree, you will be taken away from the site.',
       'terms.p1': '<b>What this is.</b> Vectra is a free educational game about estimating sizes, masses and numbers. All values are approximate and the service is provided “as is”, without guarantees; features and progress may change.',
       'terms.p2': '<b>Fair play.</b> Answer on your own: do not look answers up in search engines, ask AI assistants or use other sources. Do not use bots, scripts or automation, and do not create several profiles to climb the rankings. Suspicious results may be removed from the leaderboards.',
-      'terms.p3': '<b>What we store.</b> An anonymous identifier (no email, password or name), your nickname, game results, answers to the daily question and your streak. Data is kept in your browser (localStorage) and in the service database (Supabase). We do not ask for contact details.',
+      'terms.p3': '<b>What we store.</b> An anonymous identifier (no email, password or name), your nickname, game results, answers to the daily question and your streak. Everything is stored on the service server (Supabase); your browser keeps only a technical token of the anonymous session. We do not ask for contact details.',
       'terms.p4': '<b>What others can see.</b> Your nickname and scores may be shown on the leaderboards. Do not put personal data into your nickname.',
       'terms.p5': '<b>Nickname.</b> No offensive nicknames or other people’s names. A nickname can be changed once every 3 days; an administrator may change an unacceptable one.',
       'terms.p6': '<b>Fair-play reminders.</b> During a round the site notices that you switched tabs or moved the cursor out of the window and gently reminds you to play on your own. The site cannot see the contents of other tabs.',
-      'terms.p7': '<b>Removing your data.</b> To delete your profile data, contact the site owner; local data can be erased by clearing the site data in your browser.',
-      'fair.short': 'For your own sake: please don’t google the answers or ask AI — Vectra trains your sense of scale, and it only grows if you answer on your own.',
+      'terms.p7': '<b>Removing your data.</b> To delete your profile data, contact the site owner; the anonymous session token can be erased by clearing the site data in your browser.',
+      'fair.short': 'For your own sake: please don’t google the answers or ask AI — Vectra trains your feel for sizes, weights and big numbers, and it only grows if you answer on your own.',
       'fair.label': 'Fair play',
       'fair.title': 'Please answer on your own',
       'fair.msg': 'Please don’t try to look the answer up — answer yourself, for your own sake and to widen your horizons.',
@@ -56,6 +59,7 @@
       'w.cat.exo': 'rocky exoplanet',
       'u.au': 'AU',
       'nick.limit': 'You can change your nickname once every 3 days.',
+      'err.save':'Could not save — check your connection and try again.','c.saving':'Saving…','c.fail':'The result could not be saved','w.range':'Hint: it weighs roughly between {a} and {b}.','w.rangeNote':'The yellow arc on the dial shows the same range.',
       'o.sun': 'Sun', 'o.mercury': 'Mercury', 'o.venus': 'Venus', 'o.earth': 'Earth', 'o.mars': 'Mars', 'o.jupiter': 'Jupiter', 'o.saturn': 'Saturn', 'o.uranus': 'Uranus', 'o.neptune': 'Neptune', 'o.black-hole': 'Sagittarius A*', 'o.mammoth': 'Woolly mammoth', 'o.eiffel': 'Eiffel Tower', 'o.pyramid': 'Great Pyramid of Giza', 'o.empire': 'Empire State Building', 'o.liberty': 'Statue of Liberty', 'o.colosseum': 'Colosseum',
       'n.diameter': 'diameter', 'n.height': 'height', 'n.hOrig': 'original height', 'n.hAnt': 'height (with antenna)', 'n.hTorch': 'height (ground to torch)', 'n.hWall': 'height of the outer wall', 'n.saturn': 'diameter (without rings)', 'n.horizon': 'event-horizon diameter', 'n.length': 'length',
       'u.mm': 'mm', 'u.cm': 'cm', 'u.m': 'm', 'u.km': 'km', 'u.mkm': 'million km'
@@ -65,7 +69,7 @@
       'menu.play': 'Играть', 'menu.explore': 'Обзор', 'menu.compareSub': 'Сопоставь два размера в масштабе', 'menu.weightSub': 'Определи вес по весам', 'menu.dailySub': 'Сегодняшняя задача на оценку',
       'menu.archive': 'Архив', 'menu.archiveSub': 'Старые вопросы дня', 'menu.stats': 'Статистика', 'menu.statsSub': 'Результаты, стрики и никнейм',
       'menu.lb': 'Таблицы лидеров', 'menu.lbSub': 'Сравни себя с другими', 'menu.recheck': 'Пройти проверку заново', 'menu.guest': 'Гость', 'menu.soon': '{name} — скоро',
-      'menu.themeToLight': 'Включить светлую тему', 'menu.themeToDark': 'Включить тёмную тему',
+      'menu.themeToLight': 'Включить светлую тему', 'menu.themeToDark': 'Включить тёмную тему', 'menu.langBusy': 'Завершите текущий раунд перед сменой языка', 'stats.chartDaily': 'Вопрос дня', 'stats.chartOthers': 'Compare’It · Угадай вес',
       'mode.compare': 'Compare’It', 'mode.weight': 'Угадай вес', 'mode.daily': 'Вопрос дня',
       'home.tagline': 'Trust your eye. Size up the world.', 'home.best': 'Личный рекорд', 'home.score': 'Очки : {n}', 'home.streak': 'STREAK', 'home.days': '{n} дн.', 'home.langs': 'Язык : {l}',
       'home.play': 'Играть', 'home.rounds': '5 РАУНДОВ', 'home.compareDesc': 'Сопоставь два размера в масштабе.', 'home.compareBtn': 'сравнить', 'home.weightDesc': 'Определи вес по весам.', 'home.weightBtn': 'Взвесить',
@@ -84,6 +88,9 @@
       'c.gameOver': 'Игра окончена', 'c.newBest': 'Новый личный рекорд!', 'c.best': 'Личный рекорд: {n}', 'c.again': 'Играть ещё', 'c.home': 'На главную', 'c.compareBtn': 'сравнить', 'c.next': 'Следующий раунд →', 'c.finish': 'Завершить',
       'c.toScale': '(в масштабе)', 'c.adjust': '(перетащи, ручкой меняй размер)', 'c.guess': 'Твой ответ', 'c.actualL': 'Реально', 'c.zoom': 'зум', 'c.grid': 'сетка', 'c.zoomOut': 'отдалить',
       'c.synced': 'Сохранено в профиле', 'c.local': 'Сохранено только на этом устройстве',
+      'share.result': 'Поделиться результатом', 'share.copied': 'Скопировано в буфер', 'share.title': 'Мой результат в Vectra', 'share.text': 'Набрал {score} из 500 в Compare’It на Vectra. Побьешь?',
+      'share.line': 'Набрал {score} из {max} в «{mode}» на Vectra. Побьёшь?', 'share.lbl': 'Отправь результат другу', 'share.native': 'Поделиться…', 'share.copyText': 'Копировать текст', 'share.save': 'Сохранить картинку', 'share.imgCopied': 'Картинка скопирована — вставь её в чат (Ctrl+V)', 'share.copyFail': 'Не удалось скопировать — сохрани картинку', 'share.beat': 'Побьёшь?',
+      'menu.sound': 'Звук', 'menu.soundOff': 'Выключить звук', 'menu.soundOn': 'Включить звук', 'w.fact': 'Интересный факт', 'w.cat.tech': 'техника', 'w.cat.item': 'предмет', 'n.wingspan': 'размах крыльев', 'n.hShoulder': 'высота в холке', 'n.width': 'ширина',
       'nick.title': 'Придумай никнейм', 'nick.text': 'Он будет виден в статистике и позже в таблицах лидеров. Регистрация не нужна.', 'nick.ph': 'Твой никнейм', 'nick.ok': 'Продолжить', 'nick.anon': 'Остаться анонимом',
       'nick.rules': '3–20 символов: буквы, цифры, _ . -', 'nick.taken': 'Этот никнейм уже занят', 'nick.saving': 'Сохраняем…', 'nick.later': 'Позже никнейм можно сменить в разделе «Статистика».', 'menu.nickChange': 'Сменить никнейм',
       'w.instr': 'Укажи вес объекта.', 'w.toWeigh': 'Взвесить', 'w.hint': '(тяните стрелку, двигайте ползунок или введите число)',
@@ -97,12 +104,12 @@
       'terms.decline': 'Если вы не согласны, вы будете перенаправлены с сайта.',
       'terms.p1': '<b>Что это.</b> Vectra — бесплатная образовательная игра на оценку размеров, масс и чисел. Все значения приближённые, сервис предоставляется «как есть», без гарантий; функции и прогресс могут меняться.',
       'terms.p2': '<b>Честная игра.</b> Отвечайте сами: не ищите ответы в поисковиках, у нейросетей и в других источниках. Не используйте ботов, скрипты и автоматизацию, не создавайте несколько профилей ради рейтинга. Подозрительные результаты могут быть удалены из таблиц лидеров.',
-      'terms.p3': '<b>Какие данные хранятся.</b> Анонимный идентификатор (без почты, пароля и имени), никнейм, результаты игр, ответы на вопрос дня и стрик. Данные хранятся в вашем браузере (localStorage) и в базе сервиса (Supabase). Контактных данных мы не просим.',
+      'terms.p3': '<b>Какие данные хранятся.</b> Анонимный идентификатор (без почты, пароля и имени), никнейм, результаты игр, ответы на вопрос дня и стрик. Всё хранится на сервере сервиса (Supabase); в браузере остаётся только технический токен анонимной сессии. Контактных данных мы не просим.',
       'terms.p4': '<b>Что видят другие.</b> Ваш никнейм и результаты могут показываться в таблицах лидеров. Не используйте в нике личные данные.',
       'terms.p5': '<b>Никнейм.</b> Не используйте оскорбительные ники и чужие имена. Менять никнейм можно не чаще одного раза в 3 дня; администратор вправе изменить недопустимый ник.',
       'terms.p6': '<b>Напоминания о честной игре.</b> Во время раундов сайт замечает, что вы переключили вкладку или увели курсор за пределы окна, и мягко напоминает играть самостоятельно. Содержимое других вкладок сайту недоступно.',
-      'terms.p7': '<b>Удаление данных.</b> Чтобы удалить данные профиля, обратитесь к владельцу сайта; локальные данные можно стереть, очистив данные сайта в браузере.',
-      'fair.short': 'Ради вашего же интереса: пожалуйста, не гуглите ответы и не спрашивайте нейросети — Vectra тренирует чувство масштаба, а оно развивается, только если отвечать самому.',
+      'terms.p7': '<b>Удаление данных.</b> Чтобы удалить данные профиля, обратитесь к владельцу сайта; токен анонимной сессии можно стереть, очистив данные сайта в браузере.',
+      'fair.short': 'Ради вашего же интереса: пожалуйста, не гуглите ответы и не спрашивайте нейросети — Vectra тренирует чувство размеров, масс и больших чисел, а оно развивается, только если отвечать самому.',
       'fair.label': 'Честная игра',
       'fair.title': 'Пожалуйста, отвечайте сами',
       'fair.msg': 'Пожалуйста, не пытайтесь найти ответ — отвечайте сами, ради вашего же интереса и расширения кругозора.',
@@ -115,6 +122,7 @@
       'w.cat.exo': 'каменная экзопланета',
       'u.au': 'а. е.',
       'nick.limit': 'Менять никнейм можно не чаще одного раза в 3 дня.',
+      'err.save':'Не удалось сохранить — проверьте соединение и попробуйте ещё раз.','c.saving':'Сохраняем…','c.fail':'Результат не удалось сохранить','w.range':'Подсказка: масса примерно между {a} и {b}.','w.rangeNote':'Жёлтая дуга на циферблате показывает тот же промежуток.',
       'o.sun': 'Солнце', 'o.mercury': 'Меркурий', 'o.venus': 'Венера', 'o.earth': 'Земля', 'o.mars': 'Марс', 'o.jupiter': 'Юпитер', 'o.saturn': 'Сатурн', 'o.uranus': 'Уран', 'o.neptune': 'Нептун', 'o.black-hole': 'Стрелец A*', 'o.mammoth': 'Шерстистый мамонт', 'o.eiffel': 'Эйфелева башня', 'o.pyramid': 'Великая пирамида Гизы', 'o.empire': 'Эмпайр-стейт-билдинг', 'o.liberty': 'Статуя Свободы', 'o.colosseum': 'Колизей',
       'n.diameter': 'диаметр', 'n.height': 'высота', 'n.hOrig': 'первоначальная высота', 'n.hAnt': 'высота (с антенной)', 'n.hTorch': 'высота (от земли до факела)', 'n.hWall': 'высота внешней стены', 'n.saturn': 'диаметр (без колец)', 'n.horizon': 'диаметр горизонта событий', 'n.length': 'длина',
       'u.mm': 'мм', 'u.cm': 'см', 'u.m': 'м', 'u.km': 'км', 'u.mkm': 'млн км'
@@ -128,6 +136,6 @@
     root.querySelectorAll('[data-i18n-attr]').forEach(e => e.dataset.i18nAttr.split(';').forEach(p => { const [a, k] = p.split(':'); e.setAttribute(a, Vectra.t(k)) }));
     document.documentElement.lang = lang;
   };
-  Vectra.setLangAndReload = l => { Vectra.setLang(l); location.reload() };
-  document.addEventListener('DOMContentLoaded', () => Vectra.applyI18n());
+  Vectra.setLangAndReload = async l => { try { await Vectra.setLang(l) } catch (e) {} location.reload() };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => Vectra.applyI18n()); else Vectra.applyI18n();
 })();
