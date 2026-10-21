@@ -59,7 +59,7 @@
 
     /* ---------- ввод: стрелка, ползунок и поле всегда показывают одно и то же ---------- */
     function setVal(v, from) {
-      val = Math.max(1, Math.min(1e42, v)); if (from !== 'sl') sl.value = lg(); if (from !== 'in') ni.setValue(val, true);
+      const old = val; val = Math.max(1, Math.min(1e42, v)); if (from !== 'in' && from !== 'quiet' && Math.abs(Math.log10(val / old)) > .01) Vectra.sfx.play('tick', lg() / LMAX); if (from !== 'sl') sl.value = lg(); if (from !== 'in') ni.setValue(val, true);
       $('#wBigV').textContent = F.words(val); $('#wBigU').textContent = KG; $('#wFull').textContent = F.describe(val) + (val < 1e4 ? '' : '');
       $('#wFull').classList.remove('err');
     }
@@ -77,36 +77,42 @@
 
     /* ---------- игра ---------- */
     const setPill = () => { $('#rd').textContent = Math.min(G.round + 1, ROUNDS) + '/' + ROUNDS; $('#sc').textContent = G.score };
-    function pickObjs() {                 // 5 разных объектов, не больше двух из одной категории
-      const left = OBJ.slice().sort(() => Math.random() - .5), out = [], cnt = {};
-      for (const o of left) if (out.length < ROUNDS && (cnt[o.cat] || 0) < 2) { out.push(o); cnt[o.cat] = (cnt[o.cat] || 0) + 1 }
-      return out;
+    function pickObjs() {                 // 5 раундов = 5 весовых классов (от лёгкого к тяжёлому), без повторов силуэта; порядок перемешан
+      const sorted = OBJ.slice().sort((x, y) => x.m - y.m), n = sorted.length, out = [], shapes = new Set();
+      for (let k = 0; k < ROUNDS; k++) {
+        const pool = sorted.slice(Math.floor(k * n / ROUNDS), Math.floor((k + 1) * n / ROUNDS)), fresh = pool.filter(o => !shapes.has(o.shape)), from = fresh.length ? fresh : pool, o = from[Math.random() * from.length | 0];
+        out.push(o); shapes.add(o.shape);
+      }
+      return out.sort(() => Math.random() - .5);
     }
     function startRound() {
-      cur = G.objs[G.round]; phase = 'guess'; shown = -1; ni.reset(); ni.setDisabled(false); sl.disabled = false; setVal(1e21); disp = lg();
+      cur = G.objs[G.round]; phase = 'guess'; shown = -1; ni.reset(); ni.setDisabled(false); sl.disabled = false; setVal(1e21, 'quiet'); disp = lg();
+      const tc = Math.max(0, Math.floor(Math.log10(cur.m) / 3)), lo = Math.max(1, Math.min(tc - (Math.random() * 4 | 0), 14 - 4));       // подсказка: только 5 множителей, среди них верный
+      ni.limit([lo, lo + 1, lo + 2, lo + 3, lo + 4]);
       rc.classList.remove('on'); rc.style.display = 'none'; guessBox.style.display = ''; stage.classList.remove('res');
       $('#wTop').textContent = `${cur.name} — ${cur.note || tr('w.cat.' + cur.cat)}`;
       descs.innerHTML = `<div><span class="pk">${tr('w.desc', { name: cur.name })}</span></div><div class="gr"><em>${tr('w.hint')}</em></div>`;
       go.textContent = tr('w.toWeigh'); setPill(); Vectra.fairplay && Vectra.fairplay.on();
     }
-    function newGame() { G = { round: 0, score: 0, objs: pickObjs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
+    function newGame() { Vectra.setGameActive(true); G = { round: 0, score: 0, objs: pickObjs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
     const times = r => r < 1e4 ? F.fmtNum(r, r < 10 ? 2 : r < 100 ? 1 : 0) : F.words(r);
     function weigh() {
       const v = ni.getValue(); if (!(v >= 1 && v <= 1e42)) { $('#wFull').textContent = tr('w.bad'); $('#wFull').classList.add('err'); ni.focus(); return }
       val = v; const t = cur.m, err = Math.abs(Math.log10(val / t)), pct = Math.abs(val - t) / t * 100;
-      pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: cur.id, g: val, t }); phase = 'result'; resT = performance.now(); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
+      pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: cur.id, g: val, t, pts }); phase = 'result'; resT = performance.now(); Vectra.sfx.play('reveal', pts / 100); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
       ni.setDisabled(true); sl.disabled = true; guessBox.style.display = 'none'; rc.style.display = '';
       $('#rS').textContent = 0; rc.className = 'rcard inline ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
       $('#rA').textContent = F.describe(val) + ' ' + KG; $('#rT').textContent = F.describe(t) + ' ' + KG;
       $('#rO').textContent = tr('c.off', { x: pct < 1000 ? Math.round(pct) + '%' : '×' + times(Math.pow(10, err)) }); $('#rR').textContent = tr(val >= t ? 'w.hi' : 'w.lo', { x: times(val >= t ? val / t : t / val) });
       requestAnimationFrame(() => rc.classList.add('on')); stage.classList.add('res'); go.textContent = tr(G.round + 1 < ROUNDS ? 'c.next' : 'c.finish');
     }
-    function next() { if (G.round + 1 < ROUNDS) { G.round++; startRound() } else finish() }
+    function next() { if (G.round + 1 < ROUNDS) { Vectra.sfx.play('next'); G.round++; startRound() } else finish() }
     function finish() {
-      const best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score); Vectra.markPlayed(); Vectra.addRun('weight', G.score);
-      $('#endS').textContent = G.score; $('#endP').textContent = isBest ? tr('c.newBest') : tr('c.best', { n: best }); $('#endSync').textContent = tr('c.local');
-      if (Vectra.db && Vectra.db.enabled()) Vectra.db.submitRun('weight', G.log).then(r => { if (r) $('#endSync').textContent = tr('c.synced') }).catch(e => console.info('[vectra] run not synced:', e.message || e));
-      go.disabled = true; $('#end').classList.remove('off'); $('#again').focus();
+      Vectra.setGameActive(false);
+      const best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score);
+      $('#end').classList.add('off');
+      Vectra.showResult({ title: tr('mode.weight'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => l.pts), best, isBest, onAgain: newGame });
+      Vectra.db.submitRun('weight', G.log).then(() => {}).catch(e => { console.warn('[vectra] run not saved:', e.message || e) });
     }
     go.onclick = () => phase === 'guess' ? weigh() : next(); $('#again').onclick = newGame;
     $('#helpBtn').onclick = e => { const h = $('#how'); h.hidden = !h.hidden; e.currentTarget.setAttribute('aria-expanded', String(!h.hidden)) };

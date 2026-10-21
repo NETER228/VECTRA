@@ -33,6 +33,13 @@
     submitDaily: (day, q, guess, truth) => rpc('submit_daily', { p_day: day, p_q: q, p_guess: guess, p_truth: truth }),
     submitRun: (mode, rounds) => rpc('submit_run', { p_mode: mode, p_rounds: rounds }),
     stats: () => rpc('get_my_stats'),
+    me: () => rpc('get_me'),
+    setPrefs: ({ theme, lang }) => rpc('set_prefs', { p_theme: theme ?? null, p_lang: lang ?? null }),
+    acceptTerms: v => rpc('accept_terms', { p_version: v }),
+    setVerified: on => rpc('set_verified', { p_on: !!on }),
+    daily: day => rpc('get_daily', { p_day: day }),
+    // подробности ответов на вопрос дня (день, номер вопроса, время) для статистики
+    async dailyAnswers() { const s = await session(); if (!s) throw new Error('offline'); const { data, error } = await client().from('daily_answers').select('day,q_idx,score,answered_at').eq('user_id', s.user.id).order('answered_at', { ascending: true }); if (error) throw error; return data },
     // таблицы лидеров: view из supabase/schema.sql (виден только ник и очки)
     async leaderboard(view) { const s = await session(); if (!s) throw new Error('offline'); const { data, error } = await client().from(view).select('*'); if (error) throw error; return data }
   };
