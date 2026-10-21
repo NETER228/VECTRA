@@ -8,8 +8,9 @@
 <link rel="stylesheet" href="css/main.css">
 <script src="js/core.js"></script>
 <script src="js/config.js"></script>
-<script src="js/i18n.js"></script>
-<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/boot.js"></script>
 </head>
 <body class="gm">
 <div class="g-wrap">
@@ -33,15 +34,10 @@
 
   <section class="st-recent">
     <h3 id="recT"></h3>
-    <div id="chart" class="st-chart"></div>
+    <div id="chart"></div>
     <ul class="ar-list" id="recent"></ul>
   </section>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/menu.js"></script>
-<script src="js/terms.js"></script>
-<script src="js/nick.js"></script>
-<script src="js/stats.js"></script>
+<script>Vectra.run(['js/i18n.js', 'js/sfx.js', 'js/menu.js', 'js/terms.js', 'js/nick.js', 'js/qload.js', 'js/stats.js'], { gate: true })</script>
 </body>
 </html>

@@ -8,8 +8,9 @@
 <link rel="stylesheet" href="css/main.css">
 <script src="js/core.js"></script>
 <script src="js/config.js"></script>
-<script src="js/i18n.js"></script>
-<script>if(!Vectra.isVerified())location.replace('captcha.html');</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script src="js/supabase.js"></script>
+<script src="js/boot.js"></script>
 </head>
 <body class="gm">
 <div class="g-wrap">
@@ -22,9 +23,6 @@
   <p class="dq-note lb-sub" id="sub"></p>
   <ul class="ar-list" id="list"></ul>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
-<script src="js/supabase.js"></script>
-<script src="js/menu.js"></script>
-<script src="js/leaderboards.js"></script>
+<script>Vectra.run(['js/i18n.js', 'js/sfx.js', 'js/menu.js', 'js/leaderboards.js'], { gate: true })</script>
 </body>
 </html>
