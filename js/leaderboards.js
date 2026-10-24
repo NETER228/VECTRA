@@ -1,4 +1,4 @@
-/* leaderboards.js — таблицы лидеров из view в Supabase (leaderboard_*): виден только никнейм и очки. */
+/* leaderboards.js — таблицы лидеров из функции get_leaderboard в Supabase: виден только никнейм и очки. */
 (function () {
   const $ = s => document.querySelector(s), S = Vectra.store, lang = Vectra.lang();
   const T = lang === 'ru' ? {
@@ -11,10 +11,10 @@
     runs: 'runs', answers: 'answers', you: 'you', empty: 'Nobody here yet — be the first!', off: 'A database connection is needed. Enable anonymous sign-ins in Supabase and run supabase/schema.sql.', live: 'Just updated', loading: 'Loading…', yourBest: 'Your best on this device'
   };
   const TABS = [
-    { k: 'compare', view: 'leaderboard_compare', label: T.compare, sub: T.subCompare, score: r => r.best, extra: r => `${r.runs} ${T.runs}` },
-    { k: 'weight', view: 'leaderboard_weight', label: T.weight, sub: T.subWeight, score: r => r.best, extra: r => `${r.runs} ${T.runs}` },
-    { k: 'today', view: 'leaderboard_daily_today', label: T.today, sub: T.subToday, score: r => r.score, extra: () => '' },
-    { k: 'total', view: 'leaderboard_daily_total', label: T.total, sub: T.subTotal, score: r => r.total, extra: r => `${r.answered} ${T.answers}` }
+    { k: 'compare', label: T.compare, sub: T.subCompare, score: r => r.best, extra: r => `${r.runs} ${T.runs}` },
+    { k: 'weight', label: T.weight, sub: T.subWeight, score: r => r.best, extra: r => `${r.runs} ${T.runs}` },
+    { k: 'today', label: T.today, sub: T.subToday, score: r => r.score, extra: () => '' },
+    { k: 'total', label: T.total, sub: T.subTotal, score: r => r.total, extra: r => `${r.answered} ${T.answers}` }
   ];
   $('#title').textContent = T.title; document.title = T.title + ' — Vectra';
   const me = () => (S.get('nick', '') || '').toLowerCase(), esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -33,7 +33,7 @@
     $('#sub').textContent = tab.sub; if (cache[k]) draw(tab, cache[k]); else $('#list').innerHTML = `<li class="ar-empty">${T.loading}</li>`;
     try {
       if (!(Vectra.db && Vectra.db.enabled())) throw new Error('offline');
-      const rows = await Vectra.db.leaderboard(tab.view); cache[k] = rows; if (cur === k) { draw(tab, rows); $('#sync').textContent = T.live; $('#sync').classList.remove('off-line') }
+      const rows = await Vectra.db.leaderboard(tab.k); cache[k] = rows; if (cur === k) { draw(tab, rows); $('#sync').textContent = T.live; $('#sync').classList.remove('off-line') }
     } catch (e) {
       console.info('[vectra] leaderboard:', e.message || e);
       if (cur === k) { $('#sync').textContent = '—'; $('#sync').classList.add('off-line'); const best = S.get('best', 0); $('#list').innerHTML = `<li class="ar-empty">${T.off}${best ? `<br><b>${T.yourBest}: ${best}</b>` : ''}</li>` }

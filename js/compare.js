@@ -21,20 +21,9 @@
   const rel = r => tr(r >= 1 ? 'c.larger' : 'c.smaller', { x: fmtX(r >= 1 ? r : 1 / r) });
   const ease = t => 1 - Math.pow(1 - t, 3);
 
-  /* ---------- подбор пар: сложность растёт от раунда к раунду ---------- */
-  function pickPairs() {
-    const tiers = [[.05, 1], [.25, 1.7], [1, 2.6], [1.5, 4.2], [3, 10]], used = new Map(), res = [];
-    for (const [lo, hi] of tiers) {
-      let c = [];
-      const astro = o => ['star', 'planet', 'exo', 'bh'].includes(o.cat);
-      const tiny = o => o.cat === 'animal' || o.cat === 'item';
-      for (const a of OBJ) for (const b of OBJ) { if (a === b || (tiny(a) && astro(b)) || (tiny(b) && astro(a))) continue; const lr = Math.abs(Math.log10(b.len / a.len)); if (lr >= lo && lr <= hi) c.push([a, b, (used.get(a) || 0) + (used.get(b) || 0)]) }
-      const m = Math.min(...c.map(x => x[2])); c = c.filter(x => x[2] === m);
-      const [a, b] = c[Math.random() * c.length | 0];
-      used.set(a, (used.get(a) || 0) + 1); used.set(b, (used.get(b) || 0) + 1); res.push({ A: a, B: b });
-    }
-    return res;
-  }
+  /* ---------- подбор пар: Vectra.comparePairs (qload.js). С ?d=ГГГГ-ММ-ДД — архивная партия: пары задаются датой ---------- */
+  const qd = new URLSearchParams(location.search).get('d'), archDate = qd && /^\d{4}-\d{2}-\d{2}$/.test(qd) && Vectra.dayIndex(qd) >= 0 && qd <= Vectra.utcToday() ? qd : null;
+  const pickPairs = () => Vectra.comparePairs(OBJ, archDate ? Vectra.seededRng('compare:' + archDate) : Math.random);
 
   /* ---------- состояние ---------- */
   const cv = $('#cv'), ctx = cv.getContext('2d'), stage = $('#stage'), descs = $('#descs'), go = $('#go'), zl = $('#zl'), rc = $('#rcard');
@@ -155,9 +144,10 @@
   function next() { if (G.round + 1 < ROUNDS) { Vectra.sfx.play('next'); G.round++; startRound() } else finish() }
   function finish() {
     Vectra.setGameActive(false);
-    const S = Vectra.store, best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score);
+    const S = Vectra.store, best = S.get('best', 0), isBest = !archDate && G.score > best; if (isBest) S.set('best', G.score);
     $('#end').classList.add('off');
-    Vectra.showResult({ title: tr('mode.compare'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => (l && l.pts != null) ? l.pts : 0), best, isBest, onAgain: newGame });
+    Vectra.showResult({ title: archDate ? Vectra.compareName(archDate, lang) : tr('mode.compare'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => (l && l.pts != null) ? l.pts : 0), best, isBest, onAgain: newGame });
+    if (archDate) return;                  // партии из архива не идут в рекорды и на сервер
     Vectra.db.submitRun('compare', G.log).then(() => {}).catch(e => { console.warn('[vectra] run not saved:', e.message || e) });
   }
   go.onclick = () => phase === 'guess' ? compare() : next();
@@ -195,6 +185,7 @@
   $('#helpBtn').onclick = e => { const h = $('#how'); h.hidden = !h.hidden; e.currentTarget.setAttribute('aria-expanded', String(!h.hidden)) };
 
   new ResizeObserver(resize).observe(stage); addEventListener('vectra:theme', readCols);
+  if (archDate) { const h = document.querySelector('.g-title h1'); h.insertAdjacentHTML('beforeend', ` <small class="ar-tag">${archDate.slice(8)}.${archDate.slice(5, 7)}.${archDate.slice(2, 4)}</small>`); document.title = Vectra.compareName(archDate, lang) + ' — Vectra' }
   readCols(); resize(); newGame(); requestAnimationFrame(frame);
   }).catch(e => { console.error(e); const d = document.getElementById('descs'); if (d) d.textContent = 'Не удалось загрузить data/objects.json — запусти сайт через сервер: python3 -m http.server' });
 })();

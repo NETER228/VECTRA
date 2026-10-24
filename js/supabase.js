@@ -40,7 +40,7 @@
     daily: day => rpc('get_daily', { p_day: day }),
     // подробности ответов на вопрос дня (день, номер вопроса, время) для статистики
     async dailyAnswers() { const s = await session(); if (!s) throw new Error('offline'); const { data, error } = await client().from('daily_answers').select('day,q_idx,score,answered_at').eq('user_id', s.user.id).order('answered_at', { ascending: true }); if (error) throw error; return data },
-    // таблицы лидеров: view из supabase/schema.sql (виден только ник и очки)
-    async leaderboard(view) { const s = await session(); if (!s) throw new Error('offline'); const { data, error } = await client().from(view).select('*'); if (error) throw error; return data }
+    // таблицы лидеров: get_leaderboard из supabase/schema.sql (виден только ник и очки). kind: compare | weight | today | total
+    leaderboard: kind => rpc('get_leaderboard', { p_kind: kind })
   };
 })();

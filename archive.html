@@ -19,7 +19,8 @@
     <div class="g-title"><h1 id="title">Archive</h1><div><span class="pillbar" id="prog"></span></div></div>
     <div class="g-right"><button class="icon-btn" data-menu-open><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><a class="icon-btn" href="index.html" aria-label="Home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 9.5V20a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V9.5"/></svg></a></div>
   </header>
-  <div class="ar-bar"><label class="ar-filter"><input type="checkbox" id="only"> <span id="onlyT"></span></label><a class="again" id="todayLink" href="daily.html"></a></div>
+  <div class="ar-tabs"><div class="seg" role="tablist"><button type="button" role="tab" id="tabQ" class="on"></button><button type="button" role="tab" id="tabC"></button></div></div>
+  <div class="ar-bar"><label class="ar-filter"><input type="checkbox" id="only"> <span id="onlyT"></span></label><span class="ar-note" id="arNote" hidden></span><a class="again" id="todayLink" href="daily.html"></a></div>
   <ul class="ar-list" id="list"></ul>
 </div>
 <script>Vectra.run(['js/i18n.js', 'js/sfx.js', 'js/menu.js', 'js/qload.js', 'js/archive.js'], { gate: true })</script>

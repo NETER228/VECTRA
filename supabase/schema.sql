@@ -22,6 +22,7 @@
 drop view  if exists public.leaderboard_compare, public.leaderboard_weight, public.leaderboard_daily_today, public.leaderboard_daily_total cascade;
 drop table if exists public.run_rounds, public.game_runs, public.daily_answers, public.streaks, public.profiles, public.daily_questions, public.objects cascade;
 drop function if exists public.calc_score(double precision, double precision);
+drop function if exists public.get_leaderboard(text);
 drop function if exists public.bump_streak(uuid, date);
 drop function if exists public.ensure_profile();
 drop function if exists public.set_nickname(text);
@@ -112,7 +113,7 @@ revoke insert, update, delete, truncate on all tables in schema public from anon
 -- ============================================================================
 -- Очки: 100 · (1 − |log10(догадка / истина)| / 2), от 0 до 100 — та же формула, что в js/compare.js, js/weight.js, js/daily.js
 create function public.calc_score(p_guess double precision, p_truth double precision)
-returns int language sql immutable as $$
+returns int language sql immutable set search_path = '' as $$
   select greatest(0, least(100, round(100 * (1 - abs(ln(p_guess / p_truth) / ln(10)) / 2))))::int
 $$;
 
@@ -256,18 +257,26 @@ grant  execute on function public.submit_run(text, jsonb)                       
 grant  execute on function public.get_my_stats()                                            to authenticated;
 
 -- ============================================================================
---  Лидерборды (view отдаёт только ник и агрегаты — для будущей страницы Leaderboards)
+--  Лидерборды: функция отдаёт только ник и агрегаты. Раньше это были view, но view работают с правами владельца
+--  и обходят RLS (Supabase помечает это как ошибку), поэтому теперь явная security definer функция. kind: compare | weight | today | total
 -- ============================================================================
-create view public.leaderboard_compare as
-  select p.nickname, max(r.score) as best, count(*) as runs from public.game_runs r join public.profiles p on p.id = r.user_id
-   where r.mode = 'compare' group by p.id, p.nickname order by best desc, runs asc limit 100;
-create view public.leaderboard_weight as
-  select p.nickname, max(r.score) as best, count(*) as runs from public.game_runs r join public.profiles p on p.id = r.user_id
-   where r.mode = 'weight' group by p.id, p.nickname order by best desc, runs asc limit 100;
-create view public.leaderboard_daily_today as
-  select p.nickname, a.score from public.daily_answers a join public.profiles p on p.id = a.user_id
-   where a.day = (now() at time zone 'utc')::date order by a.score desc, a.answered_at asc limit 100;
-create view public.leaderboard_daily_total as
-  select p.nickname, sum(a.score)::int as total, count(*)::int as answered from public.daily_answers a join public.profiles p on p.id = a.user_id
-   group by p.id, p.nickname order by total desc, answered asc limit 100;
-grant select on public.leaderboard_compare, public.leaderboard_weight, public.leaderboard_daily_today, public.leaderboard_daily_total to anon, authenticated;
+create function public.get_leaderboard(p_kind text)
+returns jsonb language plpgsql stable security definer set search_path = '' as $$
+begin
+  if p_kind in ('compare', 'weight') then
+    return coalesce((select jsonb_agg(x) from (
+      select p.nickname, max(r.score)::int as best, count(*)::int as runs from public.game_runs r join public.profiles p on p.id = r.user_id
+       where r.mode = p_kind group by p.id, p.nickname order by best desc, runs asc limit 100) x), '[]'::jsonb);
+  elsif p_kind = 'today' then
+    return coalesce((select jsonb_agg(x) from (
+      select p.nickname, a.score::int as score from public.daily_answers a join public.profiles p on p.id = a.user_id
+       where a.day = (now() at time zone 'utc')::date order by a.score desc, a.answered_at asc limit 100) x), '[]'::jsonb);
+  elsif p_kind = 'total' then
+    return coalesce((select jsonb_agg(x) from (
+      select p.nickname, sum(a.score)::int as total, count(*)::int as answered from public.daily_answers a join public.profiles p on p.id = a.user_id
+       group by p.id, p.nickname order by total desc, answered asc limit 100) x), '[]'::jsonb);
+  end if;
+  raise exception 'unknown leaderboard %', p_kind;
+end $$;
+revoke execute on function public.get_leaderboard(text) from public, anon;
+grant  execute on function public.get_leaderboard(text) to authenticated;
