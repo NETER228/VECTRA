@@ -1,6 +1,6 @@
 /* weight.js — «Specify the weight»: объект стоит на весах, игрок задаёт массу.
    Три способа ввода, все связаны: стрелка на циферблате, ползунок и поле (только цифры + множители x1K … x1Td).
-   Шкала логарифмическая: 1 кг … 10⁴² кг, 270°. Очки: 100·(1 − |log10(ответ/истина)|/2). Объекты — data/objects.json (поле mass). */
+   Шкала логарифмическая: 1 кг … 10⁴² кг, 270°. Очки: Vectra.pts (100·max(0, 1 − |log10(ответ/истина)|/0.7)). Объекты — data/objects.json (поле mass). */
 (function () {
   Vectra.loadObjects().then(DATA => {
     const $ = s => document.querySelector(s), tr = Vectra.t, lang = Vectra.lang(), S = Vectra.store, F = Vectra.numFmt, ROUNDS = 5, LMAX = 42, A0 = -135, SPAN = 270;
@@ -40,7 +40,7 @@
     function dial(now) {
       const { dcx, dcy, dr, s } = g; ctx.fillStyle = col.bg; ctx.strokeStyle = col.tx; ctx.lineWidth = 2 * Math.max(.8, s);
       ctx.beginPath(); ctx.arc(dcx, dcy, dr, 0, 7); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = col.mut; ctx.fillStyle = col.mut; ctx.font = `700 ${Math.max(7, 8 * s)}px Quicksand,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.strokeStyle = col.mut; ctx.fillStyle = col.mut; ctx.font = `700 ${Math.max(7, 8 * s)}px Manrope,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       for (let l = 0; l <= LMAX; l++) { const a = ang(l), major = l % 3 === 0, [x1, y1] = pt(dr - 3 * s, a), [x2, y2] = pt(dr - (major ? 9 : 5) * s, a); ctx.lineWidth = major ? 1.8 : 1; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke() }
       for (let l = 0; l <= LMAX; l += 3) { const [x, y] = pt(dr - 18 * s, ang(l)); ctx.fillText(l ? F.ABBR[l / 3] : '1', x, y) }       // K, M, B, T, Qa … — те же подписи, что на кнопках
       ctx.textBaseline = 'alphabetic';
@@ -99,7 +99,7 @@
     function weigh() {
       const v = ni.getValue(); if (!(v >= 1 && v <= 1e42)) { $('#wFull').textContent = tr('w.bad'); $('#wFull').classList.add('err'); ni.focus(); return }
       val = v; const t = cur.m, err = Math.abs(Math.log10(val / t)), pct = Math.abs(val - t) / t * 100;
-      pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: cur.id, g: val, t, pts }); phase = 'result'; resT = performance.now(); Vectra.sfx.play('reveal', pts / 100); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
+      pts = Vectra.pts(err); G.score += pts; G.log.push({ k: cur.id, g: val, t, pts }); phase = 'result'; resT = performance.now(); Vectra.sfx.play('reveal', pts / 100); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
       ni.setDisabled(true); sl.disabled = true; guessBox.style.display = 'none'; rc.style.display = '';
       $('#rS').textContent = 0; rc.className = 'rcard inline ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
       $('#rA').textContent = F.describe(val) + ' ' + KG; $('#rT').textContent = F.describe(t) + ' ' + KG;

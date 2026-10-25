@@ -111,10 +111,10 @@ revoke insert, update, delete, truncate on all tables in schema public from anon
 -- ============================================================================
 --  Функции (RPC)
 -- ============================================================================
--- Очки: 100 · (1 − |log10(догадка / истина)| / 2), от 0 до 100 — та же формула, что в js/compare.js, js/weight.js, js/daily.js
+-- Очки: 100 · max(0, 1 − |log10(догадка / истина)| / 0.7), от 0 до 100 — та же формула, что Vectra.pts в js/core.js (×2 → 57, ×3 → 32, ×5 и хуже → 0)
 create function public.calc_score(p_guess double precision, p_truth double precision)
 returns int language sql immutable set search_path = '' as $$
-  select greatest(0, least(100, round(100 * (1 - abs(ln(p_guess / p_truth) / ln(10)) / 2))))::int
+  select greatest(0, least(100, round(100 * (1 - abs(ln(p_guess / p_truth) / ln(10)) / 0.7))))::int
 $$;
 
 -- Стрик (внутренняя функция: клиент вызвать её не может)

@@ -3,7 +3,7 @@
 (function () {
   const t = Vectra.t, S = Vectra.store, lang = Vectra.lang();
   const P = {
-    logo: '<path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/>',
+    logo: '<path d="M4 4.5l8 15.5 8-15.5M8.3 4.5L12 11.8l3.7-7.3"/>',
     x: '<path d="M6 6l12 12M18 6L6 18"/>', chev: '<path d="M9 6l6 6-6 6"/>',
     compare: '<path d="M4 9V5a1 1 0 011-1h4M15 4h4a1 1 0 011 1v4M20 15v4a1 1 0 01-1 1h-4M9 20H5a1 1 0 01-1-1v-4"/>',
     scale: '<path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 006 0zM19 7l-3 7a3 3 0 006 0z"/>',

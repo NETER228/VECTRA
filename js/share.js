@@ -15,8 +15,8 @@
 
   /* ---------- картинка ---------- */
   async function drawCard(d) {
-    try { await Promise.all([document.fonts.load('700 40px Quicksand'), document.fonts.load('400 20px Quicksand')]) } catch (e) {}
-    const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d'), F = 'Quicksand, system-ui, sans-serif';
+    try { await Promise.all([document.fonts.load('700 40px Manrope'), document.fonts.load('400 20px Manrope')]) } catch (e) {}
+    const c = document.createElement('canvas'); c.width = CW; c.height = CH; const x = c.getContext('2d'), F = 'Manrope, system-ui, sans-serif';
     const bg = x.createLinearGradient(0, 0, CW, CH); bg.addColorStop(0, '#0d1226'); bg.addColorStop(1, '#06080f'); x.fillStyle = bg; x.fillRect(0, 0, CW, CH);
     const glow = x.createRadialGradient(CW * .82, CH * .12, 10, CW * .82, CH * .12, 520); glow.addColorStop(0, 'rgba(232,121,249,.28)'); glow.addColorStop(1, 'rgba(232,121,249,0)'); x.fillStyle = glow; x.fillRect(0, 0, CW, CH);
     const glow2 = x.createRadialGradient(CW * .05, CH * 1.0, 10, CW * .05, CH * 1.0, 480); glow2.addColorStop(0, 'rgba(74,222,154,.18)'); glow2.addColorStop(1, 'rgba(74,222,154,0)'); x.fillStyle = glow2; x.fillRect(0, 0, CW, CH);

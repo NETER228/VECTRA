@@ -1,5 +1,5 @@
 /* daily.js — Daily Question (и повтор вопросов из архива: daily.html?d=ГГГГ-ММ-ДД).
-   Вопрос дня = Q.pick(номер_дня). Очки: 100·(1 − |log10(ответ/истина)|/2). Ответ вводится только цифрами + кнопки-множители. */
+   Вопрос дня = Q.pick(номер_дня). Очки: Vectra.pts (100·max(0, 1 − |log10(ответ/истина)|/0.7)). Ответ вводится только цифрами + кнопки-множители. */
 (function () {
   Vectra.loadQuestions().then(Q => {
     const $ = s => document.querySelector(s), S = Vectra.store, lang = Vectra.lang(), L = lang === 'ru' ? 0 : 1, F = Vectra.numFmt;
@@ -35,7 +35,7 @@
       return `<div class="axis">${ticks}<i class="dot g" data-p="${p(g)}"><s>${T.you}</s></i><i class="dot t" data-p="${p(t)}"><s>${T.ans}</s></i></div>`;
     }
     function show(g, anim, srvPts) {
-      const err = Math.abs(Math.log10(g / ans)), pts = srvPts == null ? Math.max(0, Math.round(100 * (1 - err / 2))) : srvPts, pct = Math.abs(g - ans) / ans * 100, r = g / ans;
+      const err = Math.abs(Math.log10(g / ans)), pts = srvPts == null ? Vectra.pts(err) : srvPts, pct = Math.abs(g - ans) / ans * 100, r = g / ans;
       const cls = pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad', res = $('#res');
       res.innerHTML = `<div class="rcard inline ${cls}"><div class="rscore"><b id="rS">${anim ? 0 : pts}</b><span> / 100</span></div>
         <div class="rl">${T.mine}: <b>${F.describe(g)} ${unit}</b></div><div class="rl">${T.real}: <b>≈ ${F.describe(ans)} ${unit}</b></div>

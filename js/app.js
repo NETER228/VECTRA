@@ -11,9 +11,9 @@
   const nArch = Vectra.dayIndex(Vectra.utcToday()), ac = $('#archCount'); if (nArch > 0) ac.textContent = t('home.questions', { n: nArch });
 
   /* ---------- «как считаются очки»: таблица и калькулятор используют ту же формулу, что и игра ---------- */
-  const pts = f => Math.max(0, Math.round(100 * (1 - Math.log10(f) / 2)));
+  const pts = f => Vectra.pts(Math.log10(f));
   const fx = f => '×' + (f >= 10 ? +f.toFixed(1) : +f.toFixed(2));
-  $('#scTab').innerHTML = [1.1, 1.5, 2, 5, 10, 30, 100].map(f => `<tr><td>${fx(f)}</td><td><b>${pts(f)}</b></td></tr>`).join('');
+  $('#scTab').innerHTML = [1.1, 1.25, 1.5, 2, 3, 4, 5].map(f => `<tr><td>${fx(f)}</td><td><b>${pts(f)}</b></td></tr>`).join('');
   const r = $('#scR'), upd = () => { const f = Math.pow(10, r.value / 100); $('#scX').textContent = t('sc.off', { x: fx(f).slice(1) }); $('#scP').textContent = t('sc.pts', { n: pts(f) }) };
   r.oninput = upd; upd();
 

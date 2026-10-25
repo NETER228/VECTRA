@@ -1,6 +1,6 @@
 /* compare.js — Compare’It: объект A показан в масштабе, объект B игрок двигает и растягивает.
    B перемещается перетаскиванием за тело, размер меняется ТОЛЬКО ползунком (ручкой на линейке).
-   Очки: 100 · (1 − |log10(догадка / истина)| / 2), от 0 до 100 за раунд. */
+   Очки: Vectra.pts — 100 · max(0, 1 − |log10(догадка / истина)| / 0.7), от 0 до 100 за раунд. */
 (function () {
   Vectra.loadObjects().then(DATA => {
   const $ = s => document.querySelector(s), ROUNDS = 5, GAP = 22, BAND = 26, tr = Vectra.t, lang = Vectra.lang();
@@ -45,10 +45,10 @@
   function marker(x, y, c, t) {
     ctx.fillStyle = c; ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(x, y - 5, 4, 0, 7); ctx.fill();
     ctx.globalAlpha = .4; ctx.beginPath(); ctx.arc(x, y - 5, 9, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
-    ctx.font = '700 12px Quicksand,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 20);
+    ctx.font = '700 12px Manrope,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 20);
   }
   const seg = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke() };
-  function label(t, x, y, c) { ctx.font = '700 12px Quicksand,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = c; ctx.fillText(t, Math.max(40, Math.min(W - 40, x)), y) }
+  function label(t, x, y, c) { ctx.font = '700 12px Manrope,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = c; ctx.fillText(t, Math.max(40, Math.min(W - 40, x)), y) }
 
   function drawGrid() {     // сетка привязана к миру: подбираем шаг 1-2-5·10ⁿ, чтобы клетка была ≥ ~46 px
     const t = 70 / z, mag = 10 ** Math.floor(Math.log10(t)), r = t / mag, m = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag, st = m * z; gridM = m;
@@ -107,7 +107,24 @@
   const MAXLEN = Math.max(...OBJ.map(o => o.len * ww(o)));
   function limits() { lzMax = Math.log(7000); lzMin = Math.log(.92 * (W - 90) / MAXLEN) }      // 7000 px/м → шаг сетки 1 см (≈70 px)
   const clampZ = v => Math.max(lzMin, Math.min(lzMax, v));
-  function zoomAt(f, px) { ax = px; fit = false; tlz = clampZ(tlz + Math.log(f)) }
+  /* Приближение идёт к зелёному объекту (кнопки и клавиши — к его центру, колесо и щипок — к курсору/пальцам) и останавливается, когда он перестал бы целиком помещаться в поле. */
+  const PADX = 14, PADTOP = 56;
+  const anchorB = () => geo.wB != null ? geo.bL + geo.wB / 2 : W / 2;
+  function maxRatio(px) {      // во сколько раз ещё можно приблизить к точке px, чтобы зелёный объект остался в поле целиком
+    const L = geo.bL, R = geo.bL + geo.wB, up = ground - (geo.gB - geo.hB); let r = Infinity;
+    if (px > L) r = Math.min(r, (px - PADX) / (px - L)); if (R > px) r = Math.min(r, (W - PADX - px) / (R - px)); if (up > 0) r = Math.min(r, (ground - PADTOP) / up);
+    return r;
+  }
+  let limitT = 0;
+  function zoomAt(f, px) {
+    ax = px; fit = false; let t = tlz + Math.log(f);
+    if (f > 1 && phase === 'guess' && geo.wB != null) {
+      const cap = Math.log(z) + Math.log(Math.max(maxRatio(px), 0));
+      if (t > cap) { t = cap; if (t <= tlz + 1e-4) { if (performance.now() - limitT > 1500) { limitT = performance.now(); Vectra.toast && Vectra.toast(tr('c.zoomLimit')) } return } }
+    }
+    tlz = clampZ(t);
+  }
+  const pinchZoom = (f, px) => { const b = tlz; zoomAt(f, px); if (tlz !== b) lz = tlz };      // щипок двумя пальцами: без сглаживания
   function fitBoth() {
     const A = cur.A, B = cur.B, a = SH[A.shape].body, b = SH[B.shape].body, res = phase === 'result', bw = res ? Math.max(Bg, B.len) : Bg;
     const xmin = Math.min(0, bx), xmax = Math.max(A.len * ww(A), bx + bw * ww(B)), hm = Math.max(A.len * (a.bottom - a.top) / a.ref, by + bw * (b.bottom - b.top) / b.ref);
@@ -134,7 +151,7 @@
   function newGame() { Vectra.setGameActive(true); G = { round: 0, score: 0, pairs: pickPairs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
   function compare() {
     const A = cur.A, B = cur.B, g = Bg / A.len, t = B.len / A.len, err = Math.abs(Math.log10(g / t)), pct = Math.abs(Bg - B.len) / B.len * 100;
-    pts = Math.max(0, Math.round(100 * (1 - err / 2))); G.score += pts; G.log.push({ k: A.id + '>' + B.id, g: g, t: t, pts }); phase = 'result'; mode = null; Vectra.sfx.play('reveal', pts / 100); Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
+    pts = Vectra.pts(err); G.score += pts; G.log.push({ k: A.id + '>' + B.id, g: g, t: t, pts }); phase = 'result'; mode = null; Vectra.sfx.play('reveal', pts / 100); Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
     $('#rS').textContent = 0; rc.className = 'rcard ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
     $('#rA').textContent = fmtLen(Bg); $('#rT').textContent = fmtLen(B.len) + ' (' + B.noun.replace(/ \(.*/, '') + ')';
     $('#rO').textContent = tr('c.off', { x: pct < 1000 ? Math.round(pct) + '%' : '×' + fmtX(Math.pow(10, err)) });
@@ -154,32 +171,65 @@
   $('#again').onclick = newGame;
 
   /* ---------- управление ---------- */
-  $('#zin').onclick = () => zoomAt(10, W / 2); $('#zout').onclick = () => zoomAt(.1, W / 2); $('#fit').onclick = fitBoth;
+  $('#zin').onclick = () => zoomAt(10, anchorB()); $('#zout').onclick = () => zoomAt(.1, anchorB()); $('#fit').onclick = fitBoth;
   stage.addEventListener('wheel', e => { e.preventDefault(); zoomAt(Math.exp(-e.deltaY * .0032), e.clientX - stage.getBoundingClientRect().left) }, { passive: false });
   const inB = (x, y) => { const w = Math.max(geo.wB, 30), h = Math.max(geo.hB, 30); return x >= geo.bL - 6 && x <= geo.bL + w + 6 && y >= geo.gB - h - 6 && y <= geo.gB + 6 };
   const pos = e => { const r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top] };
+  /* Жесты. Один палец: взять и перетащить объект / ручку размера / двигать камеру. Два пальца на пустом месте: щипок — зум, смещение — панорама.
+     Один палец держит зелёный объект, второй касается поля: расстояние между пальцами меняет размер объекта (отвёл — больше, приблизил — меньше). */
+  const ptrs = new Map(); let gest = null, primary = null;
+  const two = () => { const [a, b] = [...ptrs.values()]; return { d: Math.hypot(a.x - b.x, a.y - b.y), mx: (a.x + b.x) / 2 } };
   cv.addEventListener('pointerdown', e => {
-    const [x, y] = pos(e); cv.setPointerCapture(e.pointerId); fit = false; ax = x;
+    const [x, y] = pos(e); cv.setPointerCapture(e.pointerId); fit = false; ptrs.set(e.pointerId, { x, y });
+    if (ptrs.size === 2 && !gest) {
+      if (mode === 'size') return;                                  // палец на ручке размера: второй игнорируем
+      const t = two();
+      if (phase === 'guess' && mode === 'move') { gest = { type: 'size', d0: Math.max(t.d, 60), Bg0: Bg, hid: primary }; mode = 'size'; Vectra.sfx.play('pick') }
+      else { gest = { type: 'cam', d: Math.max(t.d, 1), mx: t.mx }; mode = 'pan' }
+      return;
+    }
+    if (ptrs.size > 1) return;
+    primary = e.pointerId; ax = x;
     if (phase === 'guess' && Math.hypot(x - geo.hand.x, y - geo.hand.y) < 26) { mode = 'size'; Vectra.sfx.play('pick'); grab.dx = geo.hand.x - x; grab.dy = geo.hand.y - y }
     else if (phase === 'guess' && inB(x, y)) { mode = 'move'; Vectra.sfx.play('pick'); grab.x = x; grab.y = y }
     else { mode = 'pan'; grab.x = x }
     cv.style.cursor = mode === 'size' ? (geo.vert ? 'ns-resize' : 'nesw-resize') : 'grabbing';
   });
   cv.addEventListener('pointermove', e => {
-    const [x, y] = pos(e);
+    const [x, y] = pos(e), q = ptrs.get(e.pointerId); if (q) { q.x = x; q.y = y }
+    if (gest) {
+      if (ptrs.size < 2) return;
+      const t = two();
+      if (gest.type === 'size') Bg = Math.max(2 / z, gest.Bg0 * Math.max(t.d, 20) / gest.d0);
+      else { const f = Math.max(t.d, 1) / gest.d; if (Math.abs(f - 1) > 1e-3) pinchZoom(f, t.mx); ox += t.mx - gest.mx; gest.d = Math.max(t.d, 1); gest.mx = t.mx }
+      return;
+    }
+    if (ptrs.size && e.pointerId !== primary) return;
     if (!mode) { cv.style.cursor = phase === 'guess' && Math.hypot(x - geo.hand.x, y - geo.hand.y) < 26 ? (geo.vert ? 'ns-resize' : 'nesw-resize') : phase === 'guess' && inB(x, y) ? 'grab' : 'default'; return }
     if (mode === 'size') {
       if (geo.vert) Bg = Math.max(2 / z, (geo.gB - (y + grab.dy)) / z);
       else { const cx = x + grab.dx - geo.off, cy = y + grab.dy + geo.off; Bg = Math.max(2 / z, ((cx - geo.bL) * geo.ux + (cy - geo.gB) * geo.uy) / (geo.ux * geo.ux + geo.uy * geo.uy) / z) }      // проекция на диагональ объекта
-    }          // размер — только отсюда
+    }          // размер — только отсюда или вторым пальцем
     else if (mode === 'move') { bx += (x - grab.x) / z; by = Math.max(0, by - (y - grab.y) / z); grab.x = x; grab.y = y }
     else { ox += x - grab.x; grab.x = x }
   });
-  const up = () => { if (mode === 'size' || mode === 'move') Vectra.sfx.play('drop'); mode = null; cv.style.cursor = 'default' }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  const up = e => {
+    ptrs.delete(e.pointerId);
+    if (gest) {
+      if (ptrs.size < 2) {
+        const g = gest, rem = [...ptrs.entries()][0]; gest = null; if (g.type === 'size') Vectra.sfx.play('drop');
+        if (rem) { primary = rem[0]; if (g.type === 'size' && rem[0] === g.hid && phase === 'guess') { mode = 'move'; grab.x = rem[1].x; grab.y = rem[1].y } else { mode = 'pan'; grab.x = rem[1].x } } else mode = null;
+      }
+      return;
+    }
+    if (primary !== null && e.pointerId !== primary) return;
+    if (mode === 'size' || mode === 'move') Vectra.sfx.play('drop'); mode = null; primary = null; cv.style.cursor = 'default';
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   stage.addEventListener('keydown', e => {
     const f = e.shiftKey ? 1.2 : 1.03;
     if (e.key === 'ArrowRight' && phase === 'guess') Bg *= f; else if (e.key === 'ArrowLeft' && phase === 'guess') Bg /= f;
-    else if (e.key === '+' || e.key === '=') zoomAt(10, W / 2); else if (e.key === '-') zoomAt(.1, W / 2); else if (e.key === 'f') fitBoth(); else if (e.key === 'Enter') go.click(); else return;
+    else if (e.key === '+' || e.key === '=') zoomAt(10, anchorB()); else if (e.key === '-') zoomAt(.1, anchorB()); else if (e.key === 'f') fitBoth(); else if (e.key === 'Enter') go.click(); else return;
     e.preventDefault();
   });
   $('#helpBtn').onclick = e => { const h = $('#how'); h.hidden = !h.hidden; e.currentTarget.setAttribute('aria-expanded', String(!h.hidden)) };

@@ -31,6 +31,9 @@
     setVerified() { mem.verified = Date.now() + 12 * 3600e3; return this.db.setVerified(true) },
     clearVerified() { mem.verified = 0; return this.db.setVerified(false) },
     markPlayed() {}, addRun() {},               // стрик и история считаются на сервере (submit_run / submit_daily)
+    // очки за ответ: 100 · max(0, 1 − |log10(ответ / истина)| / 0.7). Ошибка ×2 → 57, ×3 → 32, ×5 и хуже → 0. Та же формула в supabase/schema.sql (calc_score)
+    SCORE_SPAN: 0.7,
+    pts(errLog10) { return Math.max(0, Math.round(100 * (1 - Math.abs(errLog10) / this.SCORE_SPAN))) },
     utcToday: () => new Date().toISOString().slice(0, 10),
     dayNum,
     dayIndex(d) { return dayNum(d) - dayNum(this.START) }

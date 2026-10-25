@@ -2,9 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#07070d">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vectra — Trust your eye. Size up the world.</title>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/main.css">
 <script src="js/core.js"></script>
 <script src="js/config.js"></script>
@@ -14,7 +16,7 @@
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M3 8l4-4 4 4 4-4 5 5M3 15l4-4 4 4 4-4 5 5M3 21l4-4 4 4 4-4 5 5" transform="scale(.9) translate(1 -2)"/></symbol>
+  <symbol id="i-logo" viewBox="0 0 24 24"><path d="M4 4.5l8 15.5 8-15.5M8.3 4.5L12 11.8l3.7-7.3"/></symbol>
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
   <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
   <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 006 0zM19 7l-3 7a3 3 0 006 0z"/></symbol>
@@ -70,9 +72,9 @@
     <div class="label" id="scT" data-i18n="sc.title">How scoring works</div>
     <div class="sc-box">
       <p data-i18n-html="sc.intro">Vectra never asks for exact numbers.</p>
-      <div class="sc-formula"><small data-i18n="sc.formulaLbl">Points per guess</small><code>points = max(0, 100 × (1 − |log₁₀(guess ÷ truth)| ÷ 2))</code></div>
+      <div class="sc-formula"><small data-i18n="sc.formulaLbl">Points per guess</small><code>points = 100 × max(0, 1 − |log₁₀(guess ÷ truth)| ÷ 0.7)</code></div>
       <div class="sc-grid">
-        <div class="sc-calc"><label for="scR" data-i18n="sc.calcLbl">How far off are you?</label><input type="range" id="scR" min="0" max="200" value="30"><div class="sc-out"><span id="scX">×2</span><b id="scP">85</b></div></div>
+        <div class="sc-calc"><label for="scR" data-i18n="sc.calcLbl">How far off are you?</label><input type="range" id="scR" min="0" max="80" value="30"><div class="sc-out"><span id="scX">×2</span><b id="scP">85</b></div></div>
         <table class="sc-tab"><thead><tr><th data-i18n="sc.thOff">Off by</th><th data-i18n="sc.thPts">Points</th></tr></thead><tbody id="scTab"></tbody></table>
       </div>
       <ul class="sc-list"><li data-i18n-html="sc.m1"></li><li data-i18n-html="sc.m2"></li><li data-i18n-html="sc.m3"></li><li data-i18n-html="sc.m4"></li></ul>
