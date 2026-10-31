@@ -1,5 +1,4 @@
-/* supabase.js — тонкая обёртка над supabase-js: анонимная сессия + вызовы RPC из supabase/schema.sql.
-   Если библиотека не загрузилась или база не настроена, Vectra.db.* бросают ошибку, а игра продолжает работать локально. */
+/* supabase.js — чтение публичного рейтинга. Гостевой сайт не создаёт аккаунты. */
 (function () {
   const C = window.VECTRA_CONFIG || {};
   let sb = null, sessionP = null;
@@ -15,9 +14,7 @@
     sessionP = (async () => {
       const c = client(); if (!c) return null;
       const { data: { session: s } } = await c.auth.getSession(); if (s) return s;
-      const { data, error } = await c.auth.signInAnonymously();
-      if (error) { console.warn('[vectra] anonymous sign-in failed:', error.message); return null }
-      return data.session;
+      return null;
     })().finally(() => { setTimeout(() => { sessionP = null }, 5000) });   // при неудаче повторим позже
     return sessionP;
   }
@@ -26,8 +23,26 @@
     const { data, error } = await client().rpc(fn, args); if (error) throw error;
     return data;
   }
+  // Supabase Auth requires an email-shaped identifier; the UI still exposes only the username.
+  const loginEmail = name => `vectra.${name.toLowerCase()}@gmail.com`;
   Vectra.db = {
     enabled: () => !!client(), session,
+    async signUp(name, password) {
+      const c = client(); if (!c) throw new Error('offline');
+      const { data, error } = await c.auth.signUp({ email: loginEmail(name), password });
+      if (error) throw error;
+      if (!data.session) throw new Error('confirmation_required');
+      sessionP = Promise.resolve(data.session);
+      return data;
+    },
+    async signIn(name, password) {
+      const c = client(); if (!c) throw new Error('offline');
+      const { data, error } = await c.auth.signInWithPassword({ email: loginEmail(name), password });
+      if (error) throw error;
+      sessionP = Promise.resolve(data.session);
+      return data;
+    },
+    async signOut() { const c = client(); if (!c) return; const { error } = await c.auth.signOut(); if (error) throw error; sessionP = null },
     profile: () => rpc('ensure_profile'),
     setNickname: (n, initial) => rpc('set_nickname', { p_nick: n, p_initial: !!initial }),
     submitDaily: (day, q, guess, truth) => rpc('submit_daily', { p_day: day, p_q: q, p_guess: guess, p_truth: truth }),
@@ -41,6 +56,11 @@
     // подробности ответов на вопрос дня (день, номер вопроса, время) для статистики
     async dailyAnswers() { const s = await session(); if (!s) throw new Error('offline'); const { data, error } = await client().from('daily_answers').select('day,q_idx,score,answered_at').eq('user_id', s.user.id).order('answered_at', { ascending: true }); if (error) throw error; return data },
     // таблицы лидеров: get_leaderboard из supabase/schema.sql (виден только ник и очки). kind: compare | weight | today | total
-    leaderboard: kind => rpc('get_leaderboard', { p_kind: kind })
+    async leaderboard(kind) {
+      const c = client(); if (!c) throw new Error('offline');
+      const { data, error } = await c.rpc('get_leaderboard', { p_kind: kind });
+      if (error) throw error;
+      return data;
+    }
   };
 })();

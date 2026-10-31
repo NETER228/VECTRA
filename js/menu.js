@@ -20,7 +20,7 @@
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Menu" aria-hidden="true">
   <div class="d-head"><a class="brand" href="index.html"><span class="logo">${ic('logo')}</span><b>Vectra</b></a><button class="icon-btn" id="closeBtn" aria-label="${t('menu.close')}">${ic('x')}</button></div>
-  <a class="d-profile" href="stats.html#nick"><span class="avatar" id="mAv">?</span><span class="tt"><b id="mNick"></b><small>${t('menu.nickChange')}</small></span>${ic('chev', 'chev')}</a>
+  <a class="d-profile" href="stats.html"><span class="avatar" id="mAv">?</span><span class="tt"><b id="mNick"></b><small>${Vectra.guest ? t('c.guest') : t('menu.nickChange')}</small></span>${ic('chev', 'chev')}</a>
   <div class="d-pref"><span class="label">${t('menu.prefs')}</span>
     <div class="d-ctrls"><div class="seg" role="group" aria-label="${t('menu.lang')}"><button data-lang="ru">RU</button><button data-lang="en">EN</button></div>
     <button class="icon-btn sfx-btn" id="sfxBtn">${ic('vol', 'von')}${ic('mute', 'voff')}</button>

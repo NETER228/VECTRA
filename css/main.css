@@ -726,6 +726,35 @@ a.card:hover .pill,a.card:focus-visible .pill{background:var(--acc);color:#10101
   a.card:active,.ar-item:active{transform:scale(.985)}
 }
 
+/* Аккаунт в разделе статистики */
+#account.st-profile{display:block;padding:clamp(22px,4vw,34px);overflow:hidden}
+#nickProfile[hidden]{display:none!important}
+.account-card{max-width:780px;margin:0 auto}
+.account-heading{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+.account-mark{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--gold) 10%,transparent);color:var(--gold);font-size:22px}
+.account-heading h2{margin:0;color:var(--tx);font-size:clamp(20px,3vw,25px);letter-spacing:-.025em}
+.account-heading p{margin:5px 0 0;color:var(--mut);font-size:14px}
+.account-warning{display:flex;gap:8px;align-items:baseline;margin-bottom:22px;padding:13px 16px;border:1px solid color-mix(in srgb,var(--gold) 24%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--gold) 6%,transparent);color:var(--mut);font-size:13px;line-height:1.55}
+.account-warning b{flex:none;color:var(--gold)}
+.account-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.account-fields label{display:grid;gap:8px;color:var(--mut);font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.account-fields input{width:100%;min-width:0;box-sizing:border-box;padding:13px 15px;border:1px solid var(--line);border-radius:13px;outline:0;background:color-mix(in srgb,var(--tx) 3.5%,transparent);color:var(--tx);font-family:inherit;font-size:16px;font-weight:600;line-height:1.4;letter-spacing:normal;text-transform:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.account-fields input::placeholder{color:color-mix(in srgb,var(--mut) 58%,transparent);font-weight:500}
+.account-fields input:focus{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 6%,var(--card));box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 14%,transparent)}
+.account-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.account-actions .go{min-height:48px;padding:12px 16px;font-size:14px}
+.account-card .dq-hint{min-height:1em;margin:12px 0 0}
+.account-active{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.account-active .account-heading{margin:0}
+.account-active .go{width:auto;white-space:nowrap}
+@media(max-width:640px){
+  #account.st-profile{padding:21px 18px}
+  .account-fields,.account-actions{grid-template-columns:1fr}
+  .account-warning{display:grid;gap:3px}
+  .account-active{align-items:stretch;flex-direction:column}
+  .account-active .go{width:100%}
+}
+
 /* ---- v2: добавки для телефонов ---- */
 @media (max-width:820px){
   .card{padding:20px;min-height:0}

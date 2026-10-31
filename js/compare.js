@@ -30,7 +30,7 @@
   let W = 0, H = 0, x0 = 0, ground = 0, col = {};
   let lz = 0, tlz = 0, z = 1, ox = 0, ax = 0, fit = false, tox = 0, z0 = 1, lzMin = 0, lzMax = 0, gridM = 1;   // камера: x_экрана = ox + x_мира · z
   let Bg = 1, bx = 0, by = 0, phase = 'guess', mode = null, grab = {}, geo = { hand: { x: -99, y: -99 } };
-  let G = { round: 0, score: 0, pairs: [] }, cur = null, lastZl = '', resT = 0, pts = 0, shown = -1;
+  let G = new Vectra.GameSession([], 'pairs'), cur = null, lastZl = '', resT = 0, pts = 0, shown = -1;
 
   function readCols() { const s = getComputedStyle(document.documentElement), g = n => s.getPropertyValue(n).trim(); col = { bg: g('--bg'), card: g('--card'), pink: g('--pink'), green: g('--green'), tx: g('--tx'), mut: g('--mut'), ind: g('--ind2'), line: g('--line') } }
   function resize() { const r = Math.min(devicePixelRatio || 1, 2), b = stage.getBoundingClientRect(); W = b.width; H = b.height; cv.width = W * r; cv.height = H * r; ctx.setTransform(r, 0, 0, r, 0, 0); x0 = Math.round(W * (W < 560 ? .36 : .34)); ground = H - 72; if (cur) { limits(); tlz = clampZ(tlz) } }
@@ -148,10 +148,10 @@
     descs.innerHTML = `<div><span class="pk">${A.name}</span> — ${A.noun}: <b>${fmtLen(A.len)}</b> <em class="pk">${tr('c.toScale')}</em></div><div><span class="gr">${B.name}</span> — ${B.noun} <em class="gr">${tr('c.adjust')}</em></div>`;
     go.textContent = tr('c.compareBtn'); setPill(); G.log = G.log || []; Vectra.fairplay && Vectra.fairplay.on()
   }
-  function newGame() { Vectra.setGameActive(true); G = { round: 0, score: 0, pairs: pickPairs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
+  function newGame() { Vectra.setGameActive(true); G = new Vectra.GameSession(pickPairs(), 'pairs'); $('#end').classList.add('off'); go.disabled = false; startRound() }
   function compare() {
     const A = cur.A, B = cur.B, g = Bg / A.len, t = B.len / A.len, err = Math.abs(Math.log10(g / t)), pct = Math.abs(Bg - B.len) / B.len * 100;
-    pts = Vectra.pts(err); G.score += pts; G.log.push({ k: A.id + '>' + B.id, g: g, t: t, pts }); phase = 'result'; mode = null; Vectra.sfx.play('reveal', pts / 100); Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
+    pts = Vectra.pts(err); G.addRound({ k: A.id + '>' + B.id, g: g, t: t, pts }); phase = 'result'; mode = null; Vectra.sfx.play('reveal', pts / 100); Vectra.fairplay && Vectra.fairplay.off(); resT = performance.now(); shown = -1; setPill();
     $('#rS').textContent = 0; rc.className = 'rcard ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
     $('#rA').textContent = fmtLen(Bg); $('#rT').textContent = fmtLen(B.len) + ' (' + B.noun.replace(/ \(.*/, '') + ')';
     $('#rO').textContent = tr('c.off', { x: pct < 1000 ? Math.round(pct) + '%' : '×' + fmtX(Math.pow(10, err)) });
@@ -165,7 +165,7 @@
     $('#end').classList.add('off');
     Vectra.showResult({ title: archDate ? Vectra.compareName(archDate, lang) : tr('mode.compare'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => (l && l.pts != null) ? l.pts : 0), best, isBest, onAgain: newGame });
     if (archDate) return;                  // партии из архива не идут в рекорды и на сервер
-    Vectra.db.submitRun('compare', G.log).then(() => {}).catch(e => { console.warn('[vectra] run not saved:', e.message || e) });
+      if (!Vectra.guest) Vectra.db.submitRun('compare', G.log.map(r => ({ k: r.k, g: r.g, t: r.t }))).catch(e => { console.warn('[vectra] compare score not saved:', e.message || e); Vectra.toast && Vectra.toast(lang === 'ru' ? 'Не удалось сохранить результат' : 'Could not save result') });
   }
   go.onclick = () => phase === 'guess' ? compare() : next();
   $('#again').onclick = newGame;

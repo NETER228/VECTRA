@@ -10,7 +10,7 @@
 
     /* ---------- состояние ---------- */
     const cv = $('#cv'), ctx = cv.getContext('2d'), stage = $('#stage'), descs = $('#descs'), go = $('#go'), rc = $('#rcard'), sl = $('#wSl'), guessBox = $('#wGuess');
-    let W = 0, H = 0, g = {}, col = {}, val = 1e21, disp = 21, phase = 'guess', drag = false, pts = 0, resT = 0, shown = -1, cur = null, G = { round: 0, score: 0, objs: [], log: [] };
+    let W = 0, H = 0, g = {}, col = {}, val = 1e21, disp = 21, phase = 'guess', drag = false, pts = 0, resT = 0, shown = -1, cur = null, G = new Vectra.GameSession([], 'objs');
     const lg = () => Math.log10(val);
     const ni = Vectra.numInput($('#numin'), { unit: KG, maxClass: 14, small: false, placeholder: tr('w.ph'), label: tr('w.label'), chipsLabel: tr('w.chips') });
     $('#wMin').textContent = '1 ' + KG; $('#wMax').textContent = F.words(1e42) + ' ' + KG; $('#wTip').textContent = tr('w.tip');
@@ -94,12 +94,12 @@
       descs.innerHTML = `<div><span class="pk">${tr('w.desc', { name: cur.name })}</span></div><div class="gr"><em>${tr('w.hint')}</em></div>`;
       go.textContent = tr('w.toWeigh'); setPill(); Vectra.fairplay && Vectra.fairplay.on();
     }
-    function newGame() { Vectra.setGameActive(true); G = { round: 0, score: 0, objs: pickObjs(), log: [] }; $('#end').classList.add('off'); go.disabled = false; startRound() }
+    function newGame() { Vectra.setGameActive(true); G = new Vectra.GameSession(pickObjs(), 'objs'); $('#end').classList.add('off'); go.disabled = false; startRound() }
     const times = r => r < 1e4 ? F.fmtNum(r, r < 10 ? 2 : r < 100 ? 1 : 0) : F.words(r);
     function weigh() {
       const v = ni.getValue(); if (!(v >= 1 && v <= 1e42)) { $('#wFull').textContent = tr('w.bad'); $('#wFull').classList.add('err'); ni.focus(); return }
       val = v; const t = cur.m, err = Math.abs(Math.log10(val / t)), pct = Math.abs(val - t) / t * 100;
-      pts = Vectra.pts(err); G.score += pts; G.log.push({ k: cur.id, g: val, t, pts }); phase = 'result'; resT = performance.now(); Vectra.sfx.play('reveal', pts / 100); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
+      pts = Vectra.pts(err); G.addRound({ k: cur.id, g: val, t, pts }); phase = 'result'; resT = performance.now(); Vectra.sfx.play('reveal', pts / 100); shown = -1; setPill(); Vectra.fairplay && Vectra.fairplay.off();
       ni.setDisabled(true); sl.disabled = true; guessBox.style.display = 'none'; rc.style.display = '';
       $('#rS').textContent = 0; rc.className = 'rcard inline ' + (pts >= 80 ? 'good' : pts >= 40 ? 'mid' : 'bad');
       $('#rA').textContent = F.describe(val) + ' ' + KG; $('#rT').textContent = F.describe(t) + ' ' + KG;
@@ -112,7 +112,7 @@
       const best = S.get('best', 0), isBest = G.score > best; if (isBest) S.set('best', G.score);
       $('#end').classList.add('off');
       Vectra.showResult({ title: tr('mode.weight'), score: G.score, max: ROUNDS * 100, pts: G.log.map(l => l.pts), best, isBest, onAgain: newGame });
-      Vectra.db.submitRun('weight', G.log).then(() => {}).catch(e => { console.warn('[vectra] run not saved:', e.message || e) });
+      if (!Vectra.guest) Vectra.db.submitRun('weight', G.log.map(r => ({ k: r.k, g: r.g, t: r.t }))).catch(e => { console.warn('[vectra] weight score not saved:', e.message || e); Vectra.toast && Vectra.toast(lang === 'ru' ? 'Не удалось сохранить результат' : 'Could not save result') });
     }
     go.onclick = () => phase === 'guess' ? weigh() : next(); $('#again').onclick = newGame;
     $('#helpBtn').onclick = e => { const h = $('#how'); h.hidden = !h.hidden; e.currentTarget.setAttribute('aria-expanded', String(!h.hidden)) };

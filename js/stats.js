@@ -14,6 +14,33 @@
     ok: 'Nickname saved', okLocal: 'Saved on this device. Could not reach the database.', taken: 'This nickname is already taken', invalid: '3–20 characters: letters, digits, _ . -', saving: 'Saving…', modeC: 'Compare’It', modeW: 'Specify the weight', modeD: 'Daily Question', maxC: '/ 500', maxD: '/ 100'
   };
   $('#title').textContent = T.title; document.title = T.title + ' — Vectra'; $('#nickLbl').textContent = T.nick; $('#saveNick').textContent = T.save; $('#nickLimit').textContent = T.limit; $('#recT').textContent = T.recent;
+  const account = $('#account');
+  const accountText = lang === 'ru';
+  if (Vectra.guest) {
+    account.innerHTML = `<div class="account-card"><div class="account-heading"><span class="account-mark" aria-hidden="true">✦</span><div><h2>${accountText ? 'Аккаунт и статистика' : 'Account and statistics'}</h2><p>${accountText ? 'Сохраняй результаты и смотри свой прогресс.' : 'Save results and keep track of your progress.'}</p></div></div><div class="account-warning"><b>${accountText ? 'Регистрация без почты' : 'No email required'}</b><span>${accountText ? 'Нужны только логин и пароль. Если забудешь пароль, восстановить его будет нельзя.' : 'Only a username and password are needed. Forgotten passwords cannot be recovered.'}</span></div><div class="account-fields"><label>${accountText ? 'Логин' : 'Username'}<input id="accountLogin" minlength="3" maxlength="24" autocomplete="username" placeholder="${accountText ? 'Например, player_01' : 'For example, player_01'}" required></label><label>${accountText ? 'Пароль · от 8 символов' : 'Password · 8 characters min'}<input id="accountPassword" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••" required></label></div><div class="account-actions"><button class="go" id="accountCreate">${accountText ? 'Создать аккаунт' : 'Create account'}</button><button class="go alt" id="accountLoginBtn">${accountText ? 'У меня уже есть аккаунт' : 'I already have an account'}</button></div><p class="dq-hint" id="accountMsg" aria-live="polite"></p></div>`;
+    const msg = $('#accountMsg'), create = $('#accountCreate'), login = $('#accountLoginBtn');
+    const credentials = () => {
+      const name = $('#accountLogin').value.trim(), password = $('#accountPassword').value;
+      if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) throw new Error(accountText ? 'Логин: 3–24 символа, латиница, цифры, _ . -' : 'Username: 3–24 characters, letters, digits, _ . -');
+      if (password.length < 8) throw new Error(accountText ? 'Пароль должен содержать минимум 8 символов.' : 'Password must be at least 8 characters.');
+      return { name, password };
+    };
+    const auth = async (method, button) => {
+      button.disabled = true; msg.className = 'dq-hint';
+      try { const { name, password } = credentials(); msg.textContent = accountText ? 'Подключаем аккаунт…' : 'Signing in…'; await Vectra.db[method](name, password); S.set('emailLogin', name); location.href = 'index.html'; }
+      catch (e) { msg.textContent = e.message === 'confirmation_required' ? (accountText ? 'В Supabase включено подтверждение почты. Для регистрации без почты его нужно отключить.' : 'Email confirmation is enabled in Supabase. Disable it to register without email.') : (e.message || (accountText ? 'Не удалось выполнить вход.' : 'Could not sign in.')); msg.classList.add('err'); button.disabled = false; }
+    };
+    create.onclick = () => auth('signUp', create); login.onclick = () => auth('signIn', login);
+  } else {
+    account.innerHTML = `<div class="account-card account-active"><div class="account-heading"><span class="account-mark" aria-hidden="true">✓</span><div><h2>${accountText ? 'Статистика сохраняется' : 'Statistics are being saved'}</h2><p>${accountText ? 'Вошли как' : 'Signed in as'} <b>${esc(S.get('emailLogin', ''))}</b></p></div></div><button class="go alt" id="accountLogout">${accountText ? 'Выйти из аккаунта' : 'Sign out'}</button></div>`;
+    $('#accountLogout').onclick = async () => { await Vectra.db.signOut(); location.reload() };
+  }
+  if (Vectra.guest) {
+    $('#nickProfile').hidden = true; $('.st-recent').hidden = true;
+    $('#sync').textContent = lang === 'ru' ? 'Гостевой режим' : 'Guest mode';
+    $('#tiles').innerHTML = `<p class="dq-note">${lang === 'ru' ? 'Гостевые результаты не сохраняются. Посмотрите таблицу лидеров.' : 'Guest results are not saved. See the leaderboards.'} <a href="leaderboards.html">${lang === 'ru' ? 'Таблицы лидеров' : 'Leaderboards'}</a></p>`;
+    return;
+  }
 
   const tile = (cls, label, big, sub) => `<div class="st-tile ${cls}"><small>${label}</small><b>${big}</b><span>${sub}</span></div>`;
   function render(s, synced) {

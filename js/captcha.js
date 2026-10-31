@@ -1,5 +1,4 @@
-/* captcha.js — капча для ПК: «Я не робот» → провести мышью по подсвеченной траектории.
-   verify() и makeChallenge() — чистые функции: в проде переносятся в Supabase Edge Function. */
+/* captcha.js — необязательная задача с линией. Она не удостоверяет личность посетителя. */
 const $ = s => document.querySelector(s), cv = $('#c'), ctx = cv.getContext('2d');
 const win = $('#win'), box = $('#box'), msg = $('#msg'), okc = $('#ok'), okTxt = $('#okTxt'), hint = $('#hint'), hintTxt = $('#hintTxt'), bar = $('#bar');
 const POP_R = 52, TTL = 60000, MC = ['#5b6bd6', '#8a7fe0', '#46a37e', '#c46ad6', '#6f86b8', '#9aa3d6'];
@@ -174,13 +173,13 @@ function finish() {
   if (err) { ghost = performance.now(); return reset(err, true) }
   st = 'done'; fails = 0; mice.forEach(m => m.wp = null); win.classList.remove('off'); hint.classList.add('off'); box.className = 'box spin'; say('Проверяем…');
   const t0 = user[0][2], payload = { id: ch.id, pts: user.map(p => [Math.round(p[0]), Math.round(p[1]), Math.round(p[2] - t0)]) };
-  console.log('captcha payload →', payload);
+  // Локальное упражнение с траекторией, не серверная проверка человека.
   setTimeout(() => { box.className = 'box ok'; say('Галочка поставлена', 'good'); vp = Vectra.setVerified().catch(e => { verr = e; console.warn('[vectra] set_verified failed:', e.message || e) }) }, 700);
   setTimeout(() => { win.classList.add('off'); okTxt.textContent = 'Переходим на главную…'; okc.classList.remove('off'); dispatchEvent(new CustomEvent('vectra:captcha-pass', { detail: payload })) }, 1500);
   setTimeout(async () => {
     await vp; if (verr) { okc.classList.add('off'); win.classList.remove('off'); box.className = 'box'; st = 'idle'; say('Не удалось сохранить результат проверки на сервере. Проверьте соединение и попробуйте ещё раз.', 'err'); return }
     const go = () => { location.href = 'index.html' };
-    if (Vectra.needsTerms() || Vectra.needsNick()) { okc.classList.add('off'); Vectra.onboard(go) } else go();
+    if (!Vectra.guest && (Vectra.needsTerms() || Vectra.needsNick())) { okc.classList.add('off'); Vectra.onboard(go) } else go();
   }, 2600);
 }
 box.onclick = begin;

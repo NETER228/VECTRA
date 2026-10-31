@@ -4,8 +4,8 @@
   Vectra.loadQuestions().then(Q => {
     const $ = s => document.querySelector(s), S = Vectra.store, lang = Vectra.lang(), L = lang === 'ru' ? 0 : 1, F = Vectra.numFmt;
     const T = {
-      ru: { title: 'Вопрос дня', ph: 'Ваш ответ…', chk: 'Сверить', today: 'Сегодня', arch: 'Архив', again: 'К архиву', mine: 'Ваш ответ', real: 'Правильный ответ', off: 'Ошибка', bad: 'Введите положительное число', next: 'Вернитесь завтра за новым вопросом', larger: 'раз больше', smaller: 'раз меньше', yrs: 'лет', approx: 'Ответ приближённый, очки считаются по порядку величины', you: 'Вы', ans: 'Ответ', prev: '← Прошлый вопрос', next2: 'Следующий вопрос →', errSave: 'Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.', tip: 'Вводите только цифры (дробную часть отделяйте запятой). Кнопки умножают число: K — тысяча, M — миллион, B — миллиард, T — триллион, Qa — квадриллион и так далее.', chips: 'Множитель' },
-      en: { title: 'Daily Question', ph: 'Your answer…', chk: 'Check', today: 'Today', arch: 'Archive', again: 'To archive', mine: 'Your answer', real: 'Actual', off: 'Off by', bad: 'Enter a positive number', next: 'Come back tomorrow for a new one', larger: '× larger', smaller: '× smaller', yrs: 'years', approx: 'The answer is approximate; scoring is by order of magnitude', you: 'You', ans: 'Actual', prev: '← Previous question', next2: 'Next question →', errSave: 'Could not reach the server. Check your connection and try again.', tip: 'Type digits only (use a point for decimals). The buttons multiply your number: K — thousand, M — million, B — billion, T — trillion, Qa — quadrillion and so on.', chips: 'Multiplier' }
+      ru: { title: 'Вопрос дня', ph: 'Ваш ответ…', chk: 'Сверить', today: 'Сегодня', arch: 'Архив', again: 'К архиву', mine: 'Ваш ответ', real: 'Правильный ответ', off: 'Ошибка', bad: 'Введите положительное число', next: 'Вернитесь завтра за новым вопросом', larger: 'раз больше', smaller: 'раз меньше', yrs: 'лет', approx: 'Ответ приближённый, очки считаются по порядку величины', you: 'Вы', ans: 'Ответ', prev: '← Прошлый вопрос', next2: 'Следующий вопрос →', errSave: 'Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.', tip: 'Вводите только цифры (дробную часть отделяйте запятой). Кнопки умножают число: K — тысяча, M — миллион, B — миллиард, T — триллион, Qa — квадриллион и так далее.', chips: 'Множитель', guest: 'Гостевой ответ не сохраняется.' },
+      en: { title: 'Daily Question', ph: 'Your answer…', chk: 'Check', today: 'Today', arch: 'Archive', again: 'To archive', mine: 'Your answer', real: 'Actual', off: 'Off by', bad: 'Enter a positive number', next: 'Come back tomorrow for a new one', larger: '× larger', smaller: '× smaller', yrs: 'years', approx: 'The answer is approximate; scoring is by order of magnitude', you: 'You', ans: 'Actual', prev: '← Previous question', next2: 'Next question →', errSave: 'Could not reach the server. Check your connection and try again.', tip: 'Type digits only (use a point for decimals). The buttons multiply your number: K — thousand, M — million, B — billion, T — trillion, Qa — quadrillion and so on.', chips: 'Multiplier', guest: 'Guest answers are not saved.' }
     }[lang];
 
     const today = Vectra.utcToday(); let date = new URLSearchParams(location.search).get('d') || today;
@@ -40,7 +40,7 @@
       res.innerHTML = `<div class="rcard inline ${cls}"><div class="rscore"><b id="rS">${anim ? 0 : pts}</b><span> / 100</span></div>
         <div class="rl">${T.mine}: <b>${F.describe(g)} ${unit}</b></div><div class="rl">${T.real}: <b>≈ ${F.describe(ans)} ${unit}</b></div>
         <div class="rm">${T.off} ${pct < 1000 ? Math.round(pct) + '%' : '×' + fmtX(Math.pow(10, err))} · ${r >= 1 ? fmtX(r) + ' ' + T.larger : fmtX(1 / r) + ' ' + T.smaller}</div></div>
-        ${axis(g, ans)}<p class="dq-note">${T.approx}. ${isToday ? T.next : ''}</p><a class="again" href="archive.html">${T.again}</a>`;
+        ${axis(g, ans)}<p class="dq-note">${T.approx}. ${isToday ? T.next : ''} ${Vectra.guest ? T.guest : ''}</p><a class="again" href="archive.html">${T.again}</a>`;
       $('#play').classList.add('off'); res.classList.remove('off');
       const sb = Vectra.shareBlock({ title: T.title + ' #' + (idx + 1), score: pts, max: 100, pts: [pts], isBest: false }); sb.style.marginTop = '14px'; res.querySelector('.again').before(sb); if (anim) Vectra.sfx.play('reveal', pts / 100);
       requestAnimationFrame(() => { res.querySelector('.rcard').classList.add('on'); setTimeout(() => res.querySelectorAll('.dot').forEach(d => d.style.left = d.dataset.p + '%'), 150) });
@@ -51,6 +51,11 @@
     $('#chk').onclick = async () => {
       const g = ni.getValue(); if (!(g > 0) || !isFinite(g)) { hint.textContent = T.bad; hint.classList.add('err'); ni.focus(); return }
       hint.classList.remove('err'); $('#chk').disabled = true; ni.setDisabled(true);
+      if (Vectra.guest) {
+        Vectra.fairplay && Vectra.fairplay.off();
+        saved[date] = { g, s: Vectra.pts(Math.log10(g / ans)) }; S.set('daily', saved);
+        show(g, true, saved[date].s); mark(); return;
+      }
       try {                       // сервер проверит, что этот вопрос ещё не решён, и сам посчитает очки
         const r = await Vectra.db.submitDaily(date, Q.idxOf(idx), g, ans);
         Vectra.fairplay && Vectra.fairplay.off(); saved[date] = { g: r.guess, s: r.score }; S.set('daily', saved); show(r.guess, !r.already, r.score); if (r.already) mark();
@@ -67,6 +72,7 @@
 
     /* ---------- каждый вопрос: решал ли его игрок — спрашиваем сервер ---------- */
     (async () => {
+      if (Vectra.guest) { ni.focus(); Vectra.fairplay && Vectra.fairplay.on(); return }
       let st; try { st = await Vectra.db.daily(date) } catch (e) { console.warn('[vectra] daily check failed:', e.message || e); hint.textContent = T.errSave; hint.classList.add('err'); $('#chk').disabled = true; ni.setDisabled(true); return }
       if (st.answered) { saved[date] = { g: st.g, s: st.s }; S.set('daily', saved); show(st.g, false, st.s); mark() } else { ni.focus(); Vectra.fairplay && Vectra.fairplay.on() }
     })();

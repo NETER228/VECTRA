@@ -91,6 +91,7 @@
       <div class="result-total"><b id="resNum">0</b><span>${tr('c.score')} · ${o.score} / ${o.max}</span></div>
       <div class="rounds">${roundsHtml}</div>
       <p class="result-note">${o.isBest ? tr('c.newBest') : tr('c.best', { n: o.best })}</p>
+      ${Vectra.guest ? `<p class="dq-note" role="status">${tr('c.guest')}</p>` : ''}
       <p class="share-lbl">${tr('share.lbl')}</p>
       <div id="shareSlot"></div>
       <div class="result-actions"><button class="go pink" id="resAgain">${tr('c.again')}</button><a class="go alt" href="index.html">${tr('c.home')}</a></div>

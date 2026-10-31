@@ -4,11 +4,11 @@
   const T = lang === 'ru' ? {
     title: 'Таблицы лидеров', compare: 'Compare’It', weight: 'Угадай вес', today: 'Вопрос дня · сегодня', total: 'Вопрос дня · всего',
     subCompare: 'Лучший забег из 5 раундов (максимум 500).', subWeight: 'Лучший забег из 5 раундов (максимум 500).', subToday: 'Результаты за сегодня (по UTC), максимум 100.', subTotal: 'Сумма очков за все ответы на вопрос дня.',
-    runs: 'забегов', answers: 'ответов', you: 'вы', empty: 'Пока никого нет — станьте первым!', off: 'Нужна связь с базой. Включите анонимные входы в Supabase и выполните supabase/schema.sql.', live: 'Обновлено только что', loading: 'Загружаем…', yourBest: 'Ваш рекорд на этом устройстве'
+    runs: 'забегов', answers: 'ответов', you: 'вы', empty: 'Пока результатов нет.', off: 'Не удалось загрузить рейтинг. Проверьте соединение.', live: 'Обновлено только что', loading: 'Загружаем…', yourBest: 'Ваш рекорд на этом устройстве'
   } : {
     title: 'Leaderboards', compare: 'Compare’It', weight: 'Specify the weight', today: 'Daily · today', total: 'Daily · total',
     subCompare: 'Best 5-round run (maximum 500).', subWeight: 'Best 5-round run (maximum 500).', subToday: 'Today’s results (UTC), maximum 100.', subTotal: 'Sum of points over all daily-question answers.',
-    runs: 'runs', answers: 'answers', you: 'you', empty: 'Nobody here yet — be the first!', off: 'A database connection is needed. Enable anonymous sign-ins in Supabase and run supabase/schema.sql.', live: 'Just updated', loading: 'Loading…', yourBest: 'Your best on this device'
+    runs: 'runs', answers: 'answers', you: 'you', empty: 'No results yet.', off: 'Could not load the leaderboard. Check your connection.', live: 'Just updated', loading: 'Loading…', yourBest: 'Your best on this device'
   };
   const TABS = [
     { k: 'compare', label: T.compare, sub: T.subCompare, score: r => r.best, extra: r => `${r.runs} ${T.runs}` },
