@@ -17,18 +17,18 @@
   const account = $('#account');
   const accountText = lang === 'ru';
   if (Vectra.guest) {
-    account.innerHTML = `<div class="account-card"><div class="account-heading"><span class="account-mark" aria-hidden="true">✦</span><div><h2>${accountText ? 'Аккаунт и статистика' : 'Account and statistics'}</h2><p>${accountText ? 'Сохраняй результаты и смотри свой прогресс.' : 'Save results and keep track of your progress.'}</p></div></div><div class="account-warning"><b>${accountText ? 'Регистрация без почты' : 'No email required'}</b><span>${accountText ? 'Нужны только логин и пароль. Если забудешь пароль, восстановить его будет нельзя.' : 'Only a username and password are needed. Forgotten passwords cannot be recovered.'}</span></div><div class="account-fields"><label>${accountText ? 'Логин' : 'Username'}<input id="accountLogin" minlength="3" maxlength="24" autocomplete="username" placeholder="${accountText ? 'Например, player_01' : 'For example, player_01'}" required></label><label>${accountText ? 'Пароль · от 8 символов' : 'Password · 8 characters min'}<input id="accountPassword" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••" required></label></div><div class="account-actions"><button class="go" id="accountCreate">${accountText ? 'Создать аккаунт' : 'Create account'}</button><button class="go alt" id="accountLoginBtn">${accountText ? 'У меня уже есть аккаунт' : 'I already have an account'}</button></div><p class="dq-hint" id="accountMsg" aria-live="polite"></p></div>`;
+    account.innerHTML = `<div class="account-card"><div class="account-heading"><span class="account-mark" aria-hidden="true">✦</span><div><h2>${accountText ? 'Аккаунт и статистика' : 'Account and statistics'}</h2><p>${accountText ? 'Зарегистрируйся, чтобы сохранять результаты. Публичный ник задаётся отдельно в статистике.' : 'Create an account to save results. Choose your public nickname separately in Statistics.'}</p></div></div><div class="account-fields"><label>${accountText ? 'Почта' : 'Email'}<input id="accountEmail" type="email" autocomplete="email" placeholder="name@example.com" required></label><label>${accountText ? 'Пароль · от 8 символов' : 'Password · 8 characters min'}<input id="accountPassword" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••" required></label></div><div class="account-actions"><button class="go" id="accountCreate">${accountText ? 'Создать аккаунт' : 'Create account'}</button><button class="go alt" id="accountLoginBtn">${accountText ? 'Войти' : 'Sign in'}</button></div><p class="dq-hint" id="accountMsg" aria-live="polite"></p></div>`;
     const msg = $('#accountMsg'), create = $('#accountCreate'), login = $('#accountLoginBtn');
     const credentials = () => {
-      const name = $('#accountLogin').value.trim(), password = $('#accountPassword').value;
-      if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) throw new Error(accountText ? 'Логин: 3–24 символа, латиница, цифры, _ . -' : 'Username: 3–24 characters, letters, digits, _ . -');
+      const email = $('#accountEmail').value.trim(), password = $('#accountPassword').value;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error(accountText ? 'Введи корректный адрес почты.' : 'Enter a valid email address.');
       if (password.length < 8) throw new Error(accountText ? 'Пароль должен содержать минимум 8 символов.' : 'Password must be at least 8 characters.');
-      return { name, password };
+      return { email, password };
     };
     const auth = async (method, button) => {
       button.disabled = true; msg.className = 'dq-hint';
-      try { const { name, password } = credentials(); msg.textContent = accountText ? 'Подключаем аккаунт…' : 'Signing in…'; await Vectra.db[method](name, password); S.set('emailLogin', name); location.href = 'index.html'; }
-      catch (e) { msg.textContent = e.message === 'confirmation_required' ? (accountText ? 'В Supabase включено подтверждение почты. Для регистрации без почты его нужно отключить.' : 'Email confirmation is enabled in Supabase. Disable it to register without email.') : (e.message || (accountText ? 'Не удалось выполнить вход.' : 'Could not sign in.')); msg.classList.add('err'); button.disabled = false; }
+      try { const { email, password } = credentials(); msg.textContent = accountText ? 'Подключаем аккаунт…' : 'Signing in…'; await Vectra.db[method](email, password); S.set('emailLogin', email); location.href = 'stats.html#nick'; }
+      catch (e) { const text = e.message === 'confirmation_required' ? (accountText ? 'Аккаунт создан. Подтверди почту, затем войди.' : 'Account created. Confirm your email, then sign in.') : (e.message || (accountText ? 'Не удалось выполнить вход.' : 'Could not sign in.')); msg.textContent = text; msg.classList.add('err'); button.disabled = false; }
     };
     create.onclick = () => auth('signUp', create); login.onclick = () => auth('signIn', login);
   } else {
@@ -46,6 +46,11 @@
   function render(s, synced) {
     $('#sync').textContent = synced ? T.synced : T.local; $('#sync').classList.toggle('off-line', !synced);
     const nick = (s.profile && s.profile.nickname) || ''; $('#nick').value = nick; $('#av').textContent = (nick || '?').charAt(0).toUpperCase();
+    if (!S.get('nickChosen', false)) {
+      $('#nickLbl').textContent = lang === 'ru' ? 'Придумай публичный ник' : 'Choose a public nickname';
+      $('#saveNick').textContent = lang === 'ru' ? 'Сохранить ник' : 'Save nickname';
+      $('#nickLimit').textContent = lang === 'ru' ? 'Ник должен быть уникальным — он будет виден в таблице лидеров.' : 'Your nickname must be unique; it will appear on the leaderboards.';
+    }
     if (nick) { S.set('nick', nick); dispatchEvent(new Event('vectra:profile')) }
     if (s.profile && s.profile.changed_at) { S.set('nickChangedAt', s.profile.changed_at); cooldownUI() }
     const st = s.streak || { current: 0, best: 0 }, w = s.weight || { runs: 0, best: 0, avg: 0, total: 0 };

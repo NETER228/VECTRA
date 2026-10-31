@@ -20,8 +20,8 @@
   const r = $('#scR'), upd = () => { const f = Math.pow(10, r.value / 100); $('#scX').textContent = t('sc.off', { x: fx(f).slice(1) }); $('#scP').textContent = t('sc.pts', { n: pts(f) }) };
   r.oninput = upd; upd();
 
-  // первый вход без выбранного ника — спрашиваем (капчу пользователь уже прошёл); ник, сохранённый без связи, досылаем в базу
-  if (!Vectra.guest && (Vectra.needsTerms() || Vectra.needsNick())) Vectra.onboard();
+  // Согласие требуется при первом входе; публичный ник пользователь задаёт в разделе «Статистика».
+  if (!Vectra.guest && Vectra.needsTerms()) Vectra.askTerms(() => {});
 
   // соглашение можно перечитать в любой момент (кнопка «Принять» уже не нужна — повторно только показываем)
   $('#termsLink').onclick = e => { e.preventDefault(); Vectra.askTerms(() => {}, true) };

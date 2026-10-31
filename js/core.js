@@ -17,6 +17,8 @@
   const root = document.documentElement, mem = { gameActive: false };
   const store = { get: (k, d) => (k in mem ? mem[k] : d), set(k, v) { mem[k] = v }, del(k) { delete mem[k] } };
   root.dataset.theme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';      // до загрузки профиля — системная тема
+  const savedAccent = localStorage.getItem('vectra-accent');
+  root.dataset.accent = ['violet', 'teal', 'coral', 'blue'].includes(savedAccent) ? savedAccent : 'violet';
   const fade = () => { root.classList.add('theme-crossfade'); clearTimeout(fade.t); fade.t = setTimeout(() => root.classList.remove('theme-crossfade'), 700) };      // плавная смена темы только на время смены, иначе !important ломает остальные анимации
   fade();
   const dayNum = d => Math.floor(Date.parse(d + 'T00:00:00Z') / 864e5);
@@ -29,6 +31,13 @@
     toggleTheme() {
       const t = root.dataset.theme === 'dark' ? 'light' : 'dark'; fade(); root.dataset.theme = t; mem.theme = t; dispatchEvent(new Event('vectra:theme'));
       if (!this.guest && this.db) this.db.setPrefs({ theme: t }).catch(() => {});
+    },
+    accent: () => document.documentElement.dataset.accent || 'violet',
+    setAccent(name) {
+      if (!['violet', 'teal', 'coral', 'blue'].includes(name)) return;
+      document.documentElement.dataset.accent = name;
+      localStorage.setItem('vectra-accent', name);
+      dispatchEvent(new Event('vectra:accent'));
     },
     setGameActive(v) { mem.gameActive = !!v; },
     isGameActive() { return !!mem.gameActive; },

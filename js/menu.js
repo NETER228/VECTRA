@@ -24,7 +24,13 @@
   <div class="d-pref"><span class="label">${t('menu.prefs')}</span>
     <div class="d-ctrls"><div class="seg" role="group" aria-label="${t('menu.lang')}"><button data-lang="ru">RU</button><button data-lang="en">EN</button></div>
     <button class="icon-btn sfx-btn" id="sfxBtn">${ic('vol', 'von')}${ic('mute', 'voff')}</button>
-    <button class="icon-btn theme-btn" id="themeBtn">${ic('sun', 'sun')}${ic('moon', 'moon')}</button></div></div>
+    <button class="icon-btn theme-btn" id="themeBtn">${ic('sun', 'sun')}${ic('moon', 'moon')}</button></div>
+    <div class="accent-picker"><span>${lang === 'ru' ? 'Акцент' : 'Accent'}</span><div class="accent-swatches" role="group" aria-label="${lang === 'ru' ? 'Цвет акцента' : 'Accent color'}">
+      <button class="accent-swatch violet" data-accent-pick="violet" aria-label="${lang === 'ru' ? 'Фиолетовый' : 'Violet'}"></button>
+      <button class="accent-swatch teal" data-accent-pick="teal" aria-label="${lang === 'ru' ? 'Бирюзовый' : 'Teal'}"></button>
+      <button class="accent-swatch coral" data-accent-pick="coral" aria-label="${lang === 'ru' ? 'Коралловый' : 'Coral'}"></button>
+      <button class="accent-swatch blue" data-accent-pick="blue" aria-label="${lang === 'ru' ? 'Синий' : 'Blue'}"></button>
+    </div></div></div>
   <div class="d-sec"><div class="label">${t('menu.play')}</div>
     ${item('compare.html', 'compare', t('mode.compare'), t('menu.compareSub'))}
     ${item('weight.html', 'scale', t('mode.weight'), t('menu.weightSub'))}
@@ -53,6 +59,9 @@
   // тема и язык
   const tb = $('#themeBtn'), syncTheme = () => { const l = Vectra.theme() === 'light'; tb.setAttribute('aria-label', t(l ? 'menu.themeToDark' : 'menu.themeToLight')); tb.setAttribute('aria-pressed', String(l)) };
   tb.onclick = () => { Vectra.toggleTheme(); syncTheme() }; syncTheme();
+  const accentButtons = drawer.querySelectorAll('[data-accent-pick]');
+  const syncAccent = () => accentButtons.forEach(b => { const on = b.dataset.accentPick === Vectra.accent(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)) });
+  accentButtons.forEach(b => b.onclick = () => { Vectra.setAccent(b.dataset.accentPick); syncAccent() }); syncAccent();
   drawer.querySelectorAll('[data-lang]').forEach(b => {
     b.classList.toggle('on', b.dataset.lang === lang);
     b.onclick = () => {

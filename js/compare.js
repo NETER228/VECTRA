@@ -45,10 +45,10 @@
   function marker(x, y, c, t) {
     ctx.fillStyle = c; ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(x, y - 5, 4, 0, 7); ctx.fill();
     ctx.globalAlpha = .4; ctx.beginPath(); ctx.arc(x, y - 5, 9, 0, 7); ctx.stroke(); ctx.globalAlpha = 1;
-    ctx.font = '700 12px Manrope,sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 20);
+    ctx.font = '700 12px "Golos Text",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(t, x, y - 20);
   }
   const seg = (x1, y1, x2, y2) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke() };
-  function label(t, x, y, c) { ctx.font = '700 12px Manrope,sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = c; ctx.fillText(t, Math.max(40, Math.min(W - 40, x)), y) }
+  function label(t, x, y, c) { ctx.font = '700 12px "Golos Text",sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = c; ctx.fillText(t, Math.max(40, Math.min(W - 40, x)), y) }
 
   function drawGrid() {     // сетка привязана к миру: подбираем шаг 1-2-5·10ⁿ, чтобы клетка была ≥ ~46 px
     const t = 70 / z, mag = 10 ** Math.floor(Math.log10(t)), r = t / mag, m = (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * mag, st = m * z; gridM = m;

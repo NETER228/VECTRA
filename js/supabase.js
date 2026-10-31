@@ -23,21 +23,19 @@
     const { data, error } = await client().rpc(fn, args); if (error) throw error;
     return data;
   }
-  // Supabase Auth requires an email-shaped identifier; the UI still exposes only the username.
-  const loginEmail = name => `vectra.${name.toLowerCase()}@gmail.com`;
   Vectra.db = {
     enabled: () => !!client(), session,
-    async signUp(name, password) {
+    async signUp(email, password) {
       const c = client(); if (!c) throw new Error('offline');
-      const { data, error } = await c.auth.signUp({ email: loginEmail(name), password });
+      const { data, error } = await c.auth.signUp({ email: email.trim().toLowerCase(), password });
       if (error) throw error;
       if (!data.session) throw new Error('confirmation_required');
       sessionP = Promise.resolve(data.session);
       return data;
     },
-    async signIn(name, password) {
+    async signIn(email, password) {
       const c = client(); if (!c) throw new Error('offline');
-      const { data, error } = await c.auth.signInWithPassword({ email: loginEmail(name), password });
+      const { data, error } = await c.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
       if (error) throw error;
       sessionP = Promise.resolve(data.session);
       return data;

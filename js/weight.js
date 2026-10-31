@@ -40,7 +40,7 @@
     function dial(now) {
       const { dcx, dcy, dr, s } = g; ctx.fillStyle = col.bg; ctx.strokeStyle = col.tx; ctx.lineWidth = 2 * Math.max(.8, s);
       ctx.beginPath(); ctx.arc(dcx, dcy, dr, 0, 7); ctx.fill(); ctx.stroke();
-      ctx.strokeStyle = col.mut; ctx.fillStyle = col.mut; ctx.font = `700 ${Math.max(7, 8 * s)}px Manrope,sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.strokeStyle = col.mut; ctx.fillStyle = col.mut; ctx.font = `700 ${Math.max(7, 8 * s)}px "Golos Text",sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       for (let l = 0; l <= LMAX; l++) { const a = ang(l), major = l % 3 === 0, [x1, y1] = pt(dr - 3 * s, a), [x2, y2] = pt(dr - (major ? 9 : 5) * s, a); ctx.lineWidth = major ? 1.8 : 1; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke() }
       for (let l = 0; l <= LMAX; l += 3) { const [x, y] = pt(dr - 18 * s, ang(l)); ctx.fillText(l ? F.ABBR[l / 3] : '1', x, y) }       // K, M, B, T, Qa … — те же подписи, что на кнопках
       ctx.textBaseline = 'alphabetic';
