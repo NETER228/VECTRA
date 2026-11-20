@@ -6,7 +6,7 @@
       const s = await Vectra.db.session();
       Vectra.guest = !s;
       if (s) {
-        Vectra.store.set('emailLogin', String(s.user.email || '').split('@')[0]);
+        Vectra.store.set('emailLogin', s.user.user_metadata?.login_name || String(s.user.email || '').split('@')[0]);
         const me = await Vectra.db.me();
         Vectra.hydrate(me);
       }

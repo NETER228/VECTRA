@@ -86,9 +86,14 @@
       return out.sort(() => Math.random() - .5);
     }
     function startRound() {
-      cur = G.objs[G.round]; phase = 'guess'; shown = -1; ni.reset(); ni.setDisabled(false); sl.disabled = false; setVal(1e21, 'quiet'); disp = lg();
+      cur = G.objs[G.round]; phase = 'guess'; shown = -1; ni.reset(); ni.setDisabled(false); sl.disabled = false; setVal(1, 'quiet'); disp = lg();
       const tc = Math.max(0, Math.floor(Math.log10(cur.m) / 3)), lo = Math.max(1, Math.min(tc - (Math.random() * 4 | 0), 14 - 4));       // подсказка: только 5 множителей, среди них верный
       ni.limit([lo, lo + 1, lo + 2, lo + 3, lo + 4]);
+      const large = ['planet', 'exo', 'bh', 'star', 'monument'].includes(cur.cat);
+      const lower = 10 ** (3 * tc);
+      $('#wTip').textContent = large
+        ? (lang === 'ru' ? 'Подсказка: масса в пределах от ' : 'Hint: mass ranges from ') + F.words(lower) + (lang === 'ru' ? ' до ' : ' to ') + F.words(lower * 1000) + ' ' + KG
+        : tr('w.tip');
       rc.classList.remove('on'); rc.style.display = 'none'; guessBox.style.display = ''; stage.classList.remove('res');
       $('#wTop').textContent = `${cur.name} — ${cur.note || tr('w.cat.' + cur.cat)}`;
       descs.innerHTML = `<div><span class="pk">${tr('w.desc', { name: cur.name })}</span></div><div class="gr"><em>${tr('w.hint')}</em></div>`;

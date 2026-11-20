@@ -61,7 +61,42 @@
   tb.onclick = () => { Vectra.toggleTheme(); syncTheme() }; syncTheme();
   const accentButtons = drawer.querySelectorAll('[data-accent-pick]');
   const syncAccent = () => accentButtons.forEach(b => { const on = b.dataset.accentPick === Vectra.accent(); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)) });
-  accentButtons.forEach(b => b.onclick = () => { Vectra.setAccent(b.dataset.accentPick); syncAccent() }); syncAccent();
+  let waveActive = false;
+  accentButtons.forEach(button => {
+    button.onclick = () => {
+      const name = button.dataset.accentPick;
+      if (waveActive || name === Vectra.accent()) return;
+      const apply = () => { Vectra.setAccent(name); syncAccent() };
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(); return }
+
+      const rect = button.getBoundingClientRect();
+      const x = rect.left + rect.width / 2, y = rect.top + rect.height / 2;
+      const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 6;
+      const style = document.documentElement.style;
+      style.setProperty('--accent-origin', x + 'px ' + y + 'px');
+      style.setProperty('--accent-radius', radius + 'px');
+
+      const wave = document.createElement('div');
+      wave.className = 'accent-wave';
+      wave.setAttribute('aria-hidden', 'true');
+      wave.style.left = x + 'px';
+      wave.style.top = y + 'px';
+      wave.style.width = wave.style.height = (2 * radius) + 'px';
+      wave.style.color = getComputedStyle(button).backgroundColor;
+      waveActive = true;
+      const finish = () => { wave.remove(); waveActive = false };
+      if (document.startViewTransition) {
+        // Capture the crest separately so it travels above the revealed page.
+        document.startViewTransition(() => { apply(); document.body.append(wave) }).finished.finally(finish);
+      } else {
+        document.body.append(wave);
+        wave.animate([{ scale: '0' }, { scale: '1' }], {
+          duration: 950, easing: 'cubic-bezier(.3,0,.3,1)'
+        }).finished.then(() => { apply(); finish() });
+      }
+    };
+  });
+  syncAccent();
   drawer.querySelectorAll('[data-lang]').forEach(b => {
     b.classList.toggle('on', b.dataset.lang === lang);
     b.onclick = () => {

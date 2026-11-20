@@ -887,3 +887,60 @@ a.card:hover,a.card:focus-visible{transform:translateY(-3px);box-shadow:0 16px 3
   .ar-d b{font-size:20px}.ar-name{font-size:22px}
   .label{margin:28px 0 14px}
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root), ::view-transition-new(root) { mix-blend-mode: normal; }
+  ::view-transition-old(root) { animation: none; }
+  ::view-transition-new(root) { animation: accent-reveal .95s cubic-bezier(.3,0,.3,1) both; }
+  @keyframes accent-reveal {
+    from { clip-path: circle(0 at var(--accent-origin)); }
+    to { clip-path: circle(var(--accent-radius) at var(--accent-origin)); }
+  }
+  html:not(.booting) .page .brand.big .logo svg {
+    stroke-dasharray: 80;
+    animation: vectra-signature 1.1s ease-out both;
+  }
+  @keyframes vectra-signature { from { stroke-dashoffset: 80; } to { stroke-dashoffset: 0; } }
+}
+
+.accent-wave {
+  position: fixed;
+  z-index: 2147483646;
+  translate: -50% -50%;
+  pointer-events: none;
+  border-radius: 50%;
+  view-transition-name: accent-wave;
+  background: radial-gradient(closest-side, transparent 76%,
+    color-mix(in srgb, currentColor 13%, transparent) 86%,
+    color-mix(in srgb, currentColor 58%, transparent) 95%,
+    currentColor 98%, color-mix(in srgb, currentColor 65%, white) 99%, transparent 100%);
+}
+::view-transition-group(accent-wave) { z-index: 1; }
+::view-transition-new(accent-wave) {
+  animation: accent-crest .95s cubic-bezier(.3,0,.3,1) both;
+}
+@keyframes accent-crest {
+  from { scale: 0; }
+  85% { opacity: 1; }
+  to { scale: 1; opacity: 0; }
+}
+
+/* The original text reserves its final width throughout the editing scene. */
+.brand.big b.wordmark-editing { position: relative; background: none; color: transparent; }
+.wordmark-letters {
+  position: absolute; top: 0; left: 0; color: var(--tx);
+  transform-origin: top left; transition: transform .32s cubic-bezier(.35,0,.22,1);
+}
+
+.wordmark-selected { outline: 1px solid var(--ind); }
+.wordmark-selected::after {
+  content: ""; position: absolute; inset: auto -3px -3px auto; width: 6px; height: 6px; border: 0; background: var(--ind);
+}
+.wordmark-pointer {
+  position: fixed; left: 0; top: 0; width: 19px; height: 23px; z-index: 12;
+  pointer-events: none; transition: transform .18s ease-out;
+}
+.wordmark-pointer svg { width: 100%; height: 100%; fill: var(--ind); stroke: var(--card); stroke-width: 1.5; }
+.wordmark-pointer:not(.typing) { transition: transform .32s cubic-bezier(.35,0,.22,1); }
+.wordmark-pointer .ibeam { fill: none; stroke: var(--tx); stroke-width: 2; stroke-linecap: round; }
+.wordmark-pointer.typing .arrow, .wordmark-pointer:not(.typing) .ibeam { display: none; }

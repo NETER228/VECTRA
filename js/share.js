@@ -48,35 +48,28 @@
   const toBlob = c => new Promise(ok => c.toBlob(ok, 'image/png'));
 
   /* ---------- действия ---------- */
-  async function copyText(t) { try { await navigator.clipboard.writeText(t); return true } catch (e) { return false } }
-  function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000) }
-
   function shareBlock(d) {
-    const box = document.createElement('div'); box.className = 'share-row'; let blobP = null;
-    const blob = () => blobP || (blobP = drawCard(d).then(toBlob));
-    const btn = (cls, label, icon, fn) => { const b = document.createElement('button'); b.className = 'sh-btn ' + cls; b.type = 'button'; b.innerHTML = icon + '<span>' + esc(label) + '</span>'; b.onclick = fn; box.append(b); return b };
-    const IC = {
-      tg: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3L2.9 11.5c-.9.4-.9 1 0 1.3l4.8 1.5 1.8 5.6c.2.6.4.8.9.8s.7-.2 1-.5l2.4-2.3 4.9 3.6c.9.5 1.5.2 1.8-.8l3-14.3c.3-1.3-.5-1.9-1.5-1.1zM8.4 13.7l9.8-6.2c.5-.3.9-.1.5.2l-8.1 7.3-.3 3.4z"/></svg>',
-      dc: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.6 5.3A17 17 0 0015.3 4l-.5 1.1a15.7 15.7 0 00-4.6 0L9.7 4a17 17 0 00-4.3 1.3C2.7 9.3 2 13.2 2.3 17a17.2 17.2 0 005.3 2.7l1.1-1.8c-.6-.2-1.2-.5-1.8-.9l.4-.4a12.3 12.3 0 0010.6 0l.4.4c-.6.4-1.2.7-1.8.9l1.1 1.8a17.2 17.2 0 005.3-2.7c.4-4.4-.7-8.3-2.3-11.7zM9.2 14.7c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2zm5.6 0c-1 0-1.8-.9-1.8-2s.8-2 1.8-2 1.8.9 1.8 2-.8 2-1.8 2z"/></svg>',
-      cp: '<svg viewBox="0 0 24 24" aria-hidden="true" class="st"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 012-2h9"/></svg>',
-      img: '<svg viewBox="0 0 24 24" aria-hidden="true" class="st"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>',
-      sh: '<svg viewBox="0 0 24 24" aria-hidden="true" class="st"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/></svg>'
+    const box = document.createElement('div');
+    box.className = 'share-row';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'sh-btn pk';
+    const ru = Vectra.lang() === 'ru';
+    button.textContent = ru ? 'Поделиться' : 'Share';
+    const status = document.createElement('span');
+    status.setAttribute('role', 'status');
+    button.onclick = async () => {
+      button.disabled = true;
+      status.textContent = '';
+      try {
+        const item = new ClipboardItem({ 'image/png': drawCard(d).then(toBlob) });
+        await navigator.clipboard.write([item]);
+        status.textContent = ru ? 'Результат скопирован в буфер обмена' : 'Result copied to clipboard';
+      } catch {
+        status.textContent = ru ? 'Не удалось скопировать картинку. Проверьте доступ к буферу обмена.' : 'Could not copy the image. Check clipboard access.';
+      } finally { button.disabled = false }
     };
-    const text = textOf(d);
-    if (navigator.share) btn('pk', tr('share.native'), IC.sh, async () => {
-      const b = await blob(), file = new File([b], 'vectra-result.png', { type: 'image/png' }), data = { title: tr('share.title'), text: tr('share.line', { mode: d.title, score: d.score, max: d.max }) + '\n' + d.pts.map(emoji).join(''), url: siteUrl() };
-      try { if (navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file]; await navigator.share(data) } catch (e) {}
-    });
-    btn('tg', 'Telegram', IC.tg, () => {
-      Vectra.sfx && Vectra.sfx.play('click');
-      window.open('https://t.me/share/url?url=' + encodeURIComponent(siteUrl()) + '&text=' + encodeURIComponent(tr('share.line', { mode: d.title, score: d.score, max: d.max }) + '\n' + d.pts.map(emoji).join('')), '_blank', 'noopener');
-    });
-    btn('dc', 'Discord', IC.dc, async () => {       // у Discord нет «share-ссылки»: кладём картинку в буфер обмена, остаётся вставить в чат
-      try { const b = await blob(); await navigator.clipboard.write([new ClipboardItem({ 'image/png': b })]); Vectra.toast(tr('share.imgCopied')) }
-      catch (e) { if (await copyText(text)) Vectra.toast(tr('share.copied')); else Vectra.toast(tr('share.copyFail')) }
-    });
-    btn('', tr('share.copyText'), IC.cp, async () => Vectra.toast(await copyText(text) ? tr('share.copied') : tr('share.copyFail')));
-    btn('', tr('share.save'), IC.img, async () => download(await blob(), 'vectra-result.png'));
+    box.append(button, status);
     return box;
   }
   Vectra.shareBlock = shareBlock;
@@ -92,7 +85,6 @@
       <div class="rounds">${roundsHtml}</div>
       <p class="result-note">${o.isBest ? tr('c.newBest') : tr('c.best', { n: o.best })}</p>
       ${Vectra.guest ? `<p class="dq-note" role="status">${tr('c.guest')}</p>` : ''}
-      <p class="share-lbl">${tr('share.lbl')}</p>
       <div id="shareSlot"></div>
       <div class="result-actions"><button class="go pink" id="resAgain">${tr('c.again')}</button><a class="go alt" href="index.html">${tr('c.home')}</a></div>
     </div>`;

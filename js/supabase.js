@@ -23,19 +23,25 @@
     const { data, error } = await client().rpc(fn, args); if (error) throw error;
     return data;
   }
+  function loginAddress(name) {
+    const normalized = name.trim().normalize('NFC').toLowerCase();
+    if (normalized.includes('@')) return normalized; // Previously registered email account
+    const encoded = Array.from(new TextEncoder().encode(normalized), n => n.toString(16).padStart(2, '0')).join('');
+    return encoded + '@players.vectra.invalid';
+  }
   Vectra.db = {
     enabled: () => !!client(), session,
-    async signUp(email, password) {
+    async signUp(name, password) {
       const c = client(); if (!c) throw new Error('offline');
-      const { data, error } = await c.auth.signUp({ email: email.trim().toLowerCase(), password });
+      const { data, error } = await c.auth.signUp({ email: loginAddress(name), password, options: { data: { login_name: name.trim() } } });
       if (error) throw error;
       if (!data.session) throw new Error('confirmation_required');
       sessionP = Promise.resolve(data.session);
       return data;
     },
-    async signIn(email, password) {
+    async signIn(name, password) {
       const c = client(); if (!c) throw new Error('offline');
-      const { data, error } = await c.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+      const { data, error } = await c.auth.signInWithPassword({ email: loginAddress(name), password });
       if (error) throw error;
       sessionP = Promise.resolve(data.session);
       return data;
