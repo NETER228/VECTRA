@@ -8,12 +8,12 @@
     sb = window.supabase.createClient(C.url, C.anonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'vectra-auth' } });
     return sb;
   }
-  // Анонимная сессия: регистрации нет, user_id привязан к браузеру. Нужно включить «Anonymous sign-ins» в Supabase Auth.
+  // Старые анонимные сессии не считаются аккаунтами: у них нет пароля для повторного входа.
   function session() {
     if (sessionP) return sessionP;
     sessionP = (async () => {
       const c = client(); if (!c) return null;
-      const { data: { session: s } } = await c.auth.getSession(); if (s) return s;
+      const { data: { session: s } } = await c.auth.getSession(); if (s && !s.user?.is_anonymous) return s;
       return null;
     })().finally(() => { setTimeout(() => { sessionP = null }, 5000) });   // при неудаче повторим позже
     return sessionP;
@@ -25,7 +25,7 @@
   }
   function loginAddress(name) {
     const normalized = name.trim().normalize('NFC').toLowerCase();
-    if (normalized.includes('@')) return normalized; // Previously registered email account
+    if (normalized.includes('@')) return normalized; // вход в ранее созданный аккаунт с почтой
     const encoded = Array.from(new TextEncoder().encode(normalized), n => n.toString(16).padStart(2, '0')).join('');
     return encoded + '@players.vectra.invalid';
   }

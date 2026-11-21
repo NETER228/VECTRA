@@ -19,10 +19,10 @@ function frechet(P, Q) { const n = P.length, m = Q.length, c = new Float32Array(
 function makeChallenge() {
   // Четыре вида линии: плавная кривая, волна, зигзаг и дуга. Вид, направление и размеры выбираются из seed.
   const seed = crypto.getRandomValues(new Uint32Array(1))[0], r = rng(seed), kind = ['spline', 'wave', 'zigzag', 'arc'][Math.floor(r() * 4)], vert = r() > .5, rev = r() > .5, ctrl = [], P = (a, b) => ctrl.push(vert ? [b, a] : [a, b]);
-  if (kind === 'spline') for (let i = 0; i < 6; i++) P(.1 + .8 * i / 5, .18 + .64 * r());
-  else if (kind === 'wave') { const n = 11, per = 1.4 + r() * 1.1, amp = .19 + r() * .1, ph = r() * 6.28; for (let i = 0; i < n; i++) { const t = i / (n - 1); P(.08 + .84 * t, .5 + amp * Math.sin(ph + 6.283 * per * t)) } }
-  else if (kind === 'zigzag') { const n = 5 + Math.floor(r() * 3), h = .17 + r() * .12; for (let i = 0; i < n; i++) P(.08 + .84 * i / (n - 1), .5 + (i % 2 ? h : -h) * (.8 + r() * .4)) }
-  else { const a0 = r() * 6.283, sw = (1.1 + r() * .45) * Math.PI; for (let i = 0; i < 9; i++) { const a = a0 + sw * i / 8; ctrl.push([.5 + .34 * Math.cos(a), .5 + .3 * Math.sin(a)]) } }
+  if (kind === 'spline') for (let i = 0; i < 6; i++) P(.22 + .56 * i / 5, .32 + .36 * r());
+  else if (kind === 'wave') { const n = 11, per = 1.2 + r() * .7, amp = .11 + r() * .05, ph = r() * 6.28; for (let i = 0; i < n; i++) { const t = i / (n - 1); P(.2 + .6 * t, .5 + amp * Math.sin(ph + 6.283 * per * t)) } }
+  else if (kind === 'zigzag') { const n = 5 + Math.floor(r() * 2), h = .12 + r() * .04; for (let i = 0; i < n; i++) P(.2 + .6 * i / (n - 1), .5 + (i % 2 ? h : -h)) }
+  else { const a0 = r() * 6.283, sw = (1 + r() * .3) * Math.PI; for (let i = 0; i < 9; i++) { const a = a0 + sw * i / 8; ctrl.push([.5 + .24 * Math.cos(a), .5 + .2 * Math.sin(a)]) } }
   if (rev) ctrl.reverse();
   return { id: seed.toString(36), seed, kind, ctrl, expires: Date.now() + TTL };
 }
@@ -30,7 +30,7 @@ function buildPath() { ch.path = spline(ch.ctrl.map(([a, b]) => [a * W, b * H]))
 
 /* ---------- проверка (в проде — Edge Function) ---------- */
 function verify(u, ref, tol, D) {
-  if (u.length < 25) return 'Слишком мало движений. Веди курсор плавно.';
+  if (u.length < 18) return 'Слишком мало движений. Веди курсор плавно.';
   const last = u[u.length - 1];
   if (Math.hypot(last[0] - ref[199][0], last[1] - ref[199][1]) > tol * 1.3) return 'Линия не доведена до квадрата.';
   const dur = last[2] - u[0][2];
@@ -104,6 +104,21 @@ function drawPops(now) {   // «лопнувшие» мышки: кольцо + 
 
 /* ---------- фон на время проверки: туманности, сетка, созвездие частиц, волны от цели ---------- */
 function initParts() { const n = Math.max(16, Math.min(38, Math.round(W * H / 38000))); parts = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * 18, vy: -6 - Math.random() * 14, r: .8 + Math.random() * 1.8 })) }
+function drawMotifs() {
+  if (!ch) return;
+  const r = rng(ch.seed ^ 0x71a2c9), size = Math.min(W, H);
+  ctx.save(); ctx.strokeStyle = col.pink; ctx.lineWidth = 1.4; ctx.globalAlpha = bgA * .22;
+  for (let i = 0; i < 18; i++) {
+    const x = W * (.08 + .84 * r()), y = H * (.1 + .8 * r()), radius = Math.max(5, Math.min(12, size * (.008 + .008 * r())));
+    if (ch.ref.some((p, j) => j % 8 === 0 && Math.hypot(x - p[0], y - p[1]) < tol + radius + 28)) continue;
+    ctx.beginPath();
+    if (i % 3 === 0) { ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.moveTo(x - radius - 5, y); ctx.lineTo(x - radius + 1, y); ctx.moveTo(x + radius - 1, y); ctx.lineTo(x + radius + 5, y) }
+    else if (i % 3 === 1) { ctx.moveTo(x, y - radius); ctx.lineTo(x + radius, y); ctx.lineTo(x, y + radius); ctx.lineTo(x - radius, y); ctx.closePath() }
+    else { ctx.moveTo(x - radius, y); ctx.lineTo(x + radius, y); ctx.moveTo(x, y - radius); ctx.lineTo(x, y + radius) }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 function drawBg(now, dt) {
   const t = now / 1000, R = Math.max(W, H) * .5; ctx.save(); ctx.globalAlpha = bgA;
   [[col.pink, .3, .35, .11, .17], ['#5b6bd6', .7, .3, .13, .09], [col.green, .5, .8, .09, .14]].forEach(([c, bx, by, sx, sy], i) => {
@@ -112,6 +127,7 @@ function drawBg(now, dt) {
   });
   const gs = 56, o = (t * 14) % gs; ctx.strokeStyle = col.mut + '0d'; ctx.lineWidth = 1; ctx.beginPath();
   for (let x = -gs + o; x < W; x += gs) { ctx.moveTo(x, 0); ctx.lineTo(x, H) } for (let y = -gs + o * .6; y < H; y += gs) { ctx.moveTo(0, y); ctx.lineTo(W, y) } ctx.stroke();
+  drawMotifs();
   for (const q of parts) { q.x += q.vx * dt; q.y += q.vy * dt; if (q.y < -10) { q.y = H + 10; q.x = Math.random() * W } if (q.x < -10) q.x = W + 10; if (q.x > W + 10) q.x = -10 }
   ctx.lineWidth = 1; ctx.strokeStyle = col.tx;
   for (let i = 0; i < parts.length; i++)for (let j = i + 1; j < parts.length; j++) { const d = Math.hypot(parts[i].x - parts[j].x, parts[i].y - parts[j].y); if (d < 120) { ctx.globalAlpha = bgA * (1 - d / 120) * .09; ctx.beginPath(); ctx.moveTo(parts[i].x, parts[i].y); ctx.lineTo(parts[j].x, parts[j].y); ctx.stroke() } }
@@ -179,7 +195,7 @@ function finish() {
   setTimeout(async () => {
     await vp; if (verr) { okc.classList.add('off'); win.classList.remove('off'); box.className = 'box'; st = 'idle'; say('Не удалось сохранить результат проверки на сервере. Проверьте соединение и попробуйте ещё раз.', 'err'); return }
     const go = () => { location.href = 'index.html' };
-    if (!Vectra.guest && (Vectra.needsTerms() || Vectra.needsNick())) { okc.classList.add('off'); Vectra.onboard(go) } else go();
+    if (!Vectra.guest && Vectra.needsTerms()) { okc.classList.add('off'); Vectra.askTerms(go) } else go();
   }, 2600);
 }
 box.onclick = begin;

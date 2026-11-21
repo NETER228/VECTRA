@@ -19,7 +19,7 @@
   if (Vectra.guest) {
     account.innerHTML = `<div class="account-card"><div class="account-heading"><span class="account-mark" aria-hidden="true">✦</span><div><h2>${accountText ? 'Аккаунт и статистика' : 'Account and statistics'}</h2><p>${accountText ? 'Зарегистрируйся, чтобы сохранять результаты. Запомни ник и пароль. Восстановить пароль нельзя.' : 'Create an account to save results. Remember your nickname and password. Password recovery is unavailable.'}</p></div></div><div class="account-fields"><label>${accountText ? 'Ник для входа' : 'Login nickname'}<input id="accountEmail" type="text" autocomplete="username" placeholder="Player_1" required></label><label>${accountText ? 'Пароль · от 8 символов' : 'Password · 8 characters min'}<input id="accountPassword" type="password" minlength="8" autocomplete="new-password" placeholder="••••••••" required></label></div><div class="account-actions"><button class="go" id="accountCreate">${accountText ? 'Создать аккаунт' : 'Create account'}</button><button class="go alt" id="accountLoginBtn">${accountText ? 'Войти' : 'Sign in'}</button></div><p class="dq-hint" id="accountMsg" aria-live="polite"></p></div>`;
     const msg = $('#accountMsg'), create = $('#accountCreate'), login = $('#accountLoginBtn');
-    const credentials = (method) => {
+    const credentials = method => {
       const email = $('#accountEmail').value.trim(), password = $('#accountPassword').value;
       const legacy = method === 'signIn' && email.includes('@');
       if (!legacy && !/^[а-яёa-z0-9_-]{2,16}$/iu.test(email)) throw new Error(accountText ? 'Ник: 2–16 букв, цифр, дефисов или подчёркиваний.' : 'Use 2–16 letters, digits, underscores or hyphens.');
